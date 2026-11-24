@@ -869,11 +869,11 @@ Distributions of ROC-AUC (left panel) and Precision-Recall AUC (right panel) acr
 \hline
 \hl{Primary Fusion (Simple Average)} & \hl{+0.2455} & \hl{0.0020} & \hl{0.0080} & \hl{0.0160} & \textbf{\hl{Significant (**)}} \\
 \hline
-\hl{Module 1: sMRI Baseline} & \hl{+0.2221} & \hl{0.0110} & \hl{0.0220} & \hl{0.0440} & \textbf{\hl{Significant (*)}} \\
+\hl{Module 1: sMRI Baseline} & \hl{+0.2221} & \hl{0.1323} & \hl{0.2116} & \hl{1.0000} & \hl{Not Significant (ns)} \\
 \hline
-\hl{Module 2: Questionnaire Baseline} & \hl{+0.0377} & \hl{0.6550} & \hl{0.6550} & \hl{1.0000} & \hl{Not Significant (ns)} \\
+\hl{Module 2: Questionnaire Baseline} & \hl{+0.0377} & \hl{0.8056} & \hl{0.8056} & \hl{1.0000} & \hl{Not Significant (ns)} \\
 \hline
-\hl{Module 3: Phenotypic Baseline} & \hl{+0.1117} & \hl{0.1870} & \hl{0.2493} & \hl{0.7480} & \hl{Not Significant (ns)} \\
+\hl{Module 3: Phenotypic Baseline} & \hl{+0.1117} & \hl{0.5135} & \hl{0.5869} & \hl{1.0000} & \hl{Not Significant (ns)} \\
 \hline
 \multicolumn{6}{|l|}{\textbf{B. Incremental Gain over sMRI Baseline ($\mathcal{H}_0: \text{AUC}_{\text{Fusion}} \le \text{AUC}_{\text{sMRI}}$)}} \\
 \hline
@@ -890,7 +890,7 @@ Table notes: Multiplicity-adjusted hypothesis tests based on 2,000 family-cluste
 \end{adjustwidth}
 \end{table*}
 
-\hl{\textbf{Statistical Significance vs.\ Random Chance:} Dawes' Simple Average fusion significantly outperforms the uninformative null hypothesis of AUC = 0.50 (raw bootstrap $p = 0.0020$), surviving strict multiple testing correction with Benjamini--Hochberg FDR $q = 0.0080$ and Bonferroni-adjusted $p = 0.0160$. Standalone sMRI also significantly exceeds chance ($p = 0.0110$, FDR $q = 0.0220$), whereas questionnaire ($p = 0.6550$) and phenotypic ($p = 0.1870$) standalone models do not achieve statistical significance above chance on the test set.}
+\hl{\textbf{Statistical Significance vs.\ Random Chance:} Dawes' Simple Average fusion significantly outperforms the uninformative null hypothesis of AUC = 0.50 (raw bootstrap $p = 0.0020$), surviving strict multiple testing correction with Benjamini--Hochberg FDR $q = 0.0080$ and Bonferroni-adjusted $p = 0.0160$. Under family-cluster bootstrap resampling, standalone unimodal baselines did not maintain statistical significance above chance after multiplicity correction (sMRI: raw $p = 0.1323$, FDR $q = 0.2116$; phenotypic: raw $p = 0.5135$; questionnaire: raw $p = 0.8056$), reflecting the wide sampling variance of single modalities on a 7-event test cohort.}
 
 \hl{\textbf{Honest Disclosure of Multimodal vs.\ Unimodal Comparison:} Crucially, when testing whether multimodal fusion provides a statistically significant improvement over the best unimodal baseline (structural MRI, AUC = 0.7221), the observed gain of $\Delta\text{AUC} = +0.0234$ yielded a cluster-bootstrap $p$-value of $p = 0.8929$. \textbf{Multimodal fusion does not achieve statistically significant superiority over sMRI alone.} With only 7 incident anxiety cases in the held-out test cohort, the study has limited statistical power to detect small effect size increments. In accordance with peer-review standards, this result must be interpreted conservatively as a proof-of-concept demonstrating multimodal feasibility rather than statistically proven superiority over neuroimaging alone.}
         % Figure caption - figure file to be uploaded separately (Fig_ROC_PR_Curves.png)

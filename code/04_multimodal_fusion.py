@@ -774,11 +774,14 @@ for name, p_model in models_to_test.items():
         diffs_vs_m1.append(auc_m - auc_m1)
         diffs_vs_null.append(auc_m - 0.50)
         
-    p_val_null = 2.0 * min(np.mean(np.array(diffs_vs_null) <= 0), np.mean(np.array(diffs_vs_null) >= 0))
+    p_val_null = min(1.0, 2.0 * min(np.mean(np.array(diffs_vs_null) <= 0), np.mean(np.array(diffs_vs_null) >= 0)))
     p_val_null = max(p_val_null, 1.0 / len(diffs_vs_null))
     
-    p_val_m1 = 2.0 * min(np.mean(np.array(diffs_vs_m1) <= 0), np.mean(np.array(diffs_vs_m1) >= 0))
-    p_val_m1 = max(p_val_m1, 1.0 / len(diffs_vs_m1))
+    if name == 'Module 1: Structural MRI (Pretrained ResNet-18)':
+        p_val_m1 = 1.0
+    else:
+        p_val_m1 = min(1.0, 2.0 * min(np.mean(np.array(diffs_vs_m1) <= 0), np.mean(np.array(diffs_vs_m1) >= 0)))
+        p_val_m1 = max(p_val_m1, 1.0 / len(diffs_vs_m1))
     
     test_auc_val = roc_auc_score(y_test, p_model)
     multiplicity_rows.append({

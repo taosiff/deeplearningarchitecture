@@ -36,9 +36,9 @@ Following a methodological audit, this codebase enforces strict zero-leakage pro
 8. **Cross-Multimodal Attention (Multimodal Transformer) Integration:**
    - Evaluates intra-sample cross-modal interaction across the 3 modality channels (sMRI, Questionnaires, Phenotypic).
    - Architecture: Modality projections into $d_{\text{model}}=16$, learned modality embeddings $\mathbf{e}_m \in \mathbb{R}^{16}$, Pre-LN Multi-Head Self-Attention ($H=2, d_k=8$) computed per subject, Pre-LN FFN ($d_{\text{ff}}=32$), dynamic query pooling $\mathbf{q}_{\text{pool}} \in \mathbb{R}^{16}$, and linear risk head.
-   - Strict Zero Leakage: Sample-independent forward pass (batch vs single-item diff = $0.00$), trained on `train.csv` ($n=180, 24$ pos), checkpoint selected at peak validation AUC on `val.csv` (Epoch 58, Val AUC = **0.8312**), and evaluated on `test.csv` (Test AUC = **0.5896**, Test PR-AUC = **0.2078**).
+   - Strict Zero Leakage: Sample-independent forward pass (batch vs single-item diff = $0.00$), trained on `train.csv` ($n=180, 24$ pos), checkpoint selected at peak validation AUC on `val.csv` (Epoch 58, Val AUC = **0.8442**), and evaluated on `test.csv` (Test AUC = **0.5896**, Test PR-AUC = **0.2078**).
    - Empirical Finding: Parameterized cross-attention overfits validation noise on 7 validation events, reinforcing why the parameter-free Simple Average ($0.7377$) is the robust primary clinical choice.
-   - Learned Inter-Modal Dynamics: Questionnaires and Phenotypic tokens heavily attend to sMRI ($40.4\%$ and $51.8\%$). Crucially, the learned modality pooling weights dynamically converge to **33.10%** (sMRI), **35.97%** (Questionnaires), and **30.93%** (Phenotypic), spontaneously reproducing Dawes' 33.3% equal-weight prior!
+   - Learned Inter-Modal Dynamics: Questionnaires and Phenotypic tokens heavily attend to sMRI ($40.4\%$ and $51.8\%$). Crucially, the learned modality pooling weights dynamically converge to **32.95%** (sMRI), **35.83%** (Questionnaires), and **31.22%** (Phenotypic), spontaneously reproducing Dawes' 33.3% equal-weight prior!
 
 ---
 
