@@ -1,60 +1,60 @@
 {
-  "n_repeats": 5,
-  "n_splits": 5,
-  "total_folds": 25,
-  "cohort_total_n": 304,
-  "cohort_pos_n": 45,
-  "unique_families": 152,
-  "summary": [
+  "validation_protocol": "5 repeats of 5-fold StratifiedGroupKFold on family_id (25 folds)",
+  "cohort": {
+    "total_participants": 304,
+    "incident_cases": 38,
+    "unique_families": 152,
+    "prevalence": 0.125
+  },
+  "thresholding_policy": "Optimal Youden threshold fit strictly on training fold, applied out-of-fold",
+  "models": [
     {
-      "Model / Architecture": "Module 1: sMRI (Pretrained ResNet-18)",
-      "Mean Out-of-Fold ROC-AUC": 0.5264,
-      "SD ROC-AUC": 0.0797,
-      "95% CI ROC-AUC": "[0.4951, 0.5576]",
-      "Mean PR-AUC": 0.1844,
-      "Mean F1": 0.3182,
-      "Mean Sensitivity": 0.8044,
-      "Mean Specificity": 0.4295
+      "Model / Architecture": "Module 1: sMRI (Pretrained ResNet-18 + PCA-5)",
+      "Mean Out-of-Fold AUC": 0.5305,
+      "SD AUC": 0.0971,
+      "Median AUC": 0.5255,
+      "IQR AUC [25th, 75th]": "[0.4928, 0.5995]",
+      "Range AUC [Min, Max]": "[0.3477, 0.7685]",
+      "Mean PR-AUC": 0.1815,
+      "Mean F1": 0.2102,
+      "Mean Sensitivity": 0.5757,
+      "Mean Specificity": 0.45
     },
     {
-      "Model / Architecture": "Module 2: Questionnaires (Transition)",
-      "Mean Out-of-Fold ROC-AUC": 0.6016,
-      "SD ROC-AUC": 0.0564,
-      "95% CI ROC-AUC": "[0.5795, 0.6237]",
-      "Mean PR-AUC": 0.2509,
-      "Mean F1": 0.3783,
-      "Mean Sensitivity": 0.5911,
-      "Mean Specificity": 0.7234
+      "Model / Architecture": "Module 2: Questionnaires (Transition Features)",
+      "Mean Out-of-Fold AUC": 0.5973,
+      "SD AUC": 0.1025,
+      "Median AUC": 0.6146,
+      "IQR AUC [25th, 75th]": "[0.5556, 0.6458]",
+      "Range AUC [Min, Max]": "[0.3798, 0.7925]",
+      "Mean PR-AUC": 0.2279,
+      "Mean F1": 0.246,
+      "Mean Sensitivity": 0.4779,
+      "Mean Specificity": 0.6654
     },
     {
-      "Model / Architecture": "Module 3: Phenotypic (Transition)",
-      "Mean Out-of-Fold ROC-AUC": 0.6334,
-      "SD ROC-AUC": 0.1052,
-      "95% CI ROC-AUC": "[0.5922, 0.6746]",
-      "Mean PR-AUC": 0.288,
-      "Mean F1": 0.3925,
-      "Mean Sensitivity": 0.6933,
-      "Mean Specificity": 0.6535
+      "Model / Architecture": "Module 3: Phenotypic (Transition Features)",
+      "Mean Out-of-Fold AUC": 0.6427,
+      "SD AUC": 0.0916,
+      "Median AUC": 0.6388,
+      "IQR AUC [25th, 75th]": "[0.5431, 0.7141]",
+      "Range AUC [Min, Max]": "[0.5197, 0.8293]",
+      "Mean PR-AUC": 0.2977,
+      "Mean F1": 0.3056,
+      "Mean Sensitivity": 0.4386,
+      "Mean Specificity": 0.797
     },
     {
       "Model / Architecture": "Trimodal Fusion: Simple Average (33/33/33)",
-      "Mean Out-of-Fold ROC-AUC": 0.6432,
-      "SD ROC-AUC": 0.0712,
-      "95% CI ROC-AUC": "[0.6153, 0.6711]",
-      "Mean PR-AUC": 0.2666,
-      "Mean F1": 0.3772,
-      "Mean Sensitivity": 0.8,
-      "Mean Specificity": 0.5471
-    },
-    {
-      "Model / Architecture": "Trimodal Fusion: Balanced Late (25/45/30)",
-      "Mean Out-of-Fold ROC-AUC": 0.6448,
-      "SD ROC-AUC": 0.0661,
-      "95% CI ROC-AUC": "[0.6188, 0.6707]",
-      "Mean PR-AUC": 0.2655,
-      "Mean F1": 0.3755,
-      "Mean Sensitivity": 0.7733,
-      "Mean Specificity": 0.5651
+      "Mean Out-of-Fold AUC": 0.6418,
+      "SD AUC": 0.0873,
+      "Median AUC": 0.6412,
+      "IQR AUC [25th, 75th]": "[0.5876, 0.6923]",
+      "Range AUC [Min, Max]": "[0.4907, 0.8148]",
+      "Mean PR-AUC": 0.2356,
+      "Mean F1": 0.2437,
+      "Mean Sensitivity": 0.5393,
+      "Mean Specificity": 0.6205
     }
   ]
 }

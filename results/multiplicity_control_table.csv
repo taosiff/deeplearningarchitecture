@@ -1,8 +1,8 @@
 Model,Test AUC,Raw p vs Null (0.50),Raw p vs M1 Baseline,BH FDR q-val vs Null,Bonferroni p vs Null
-Balanced Late (25/45/30),0.7117,0.004,0.99,0.028,0.028
-Simple Average (33/33/33),0.7351,0.01,0.8978,0.0351,0.0701
-Intermediate Latent Fusion,0.7091,0.0301,0.9579,0.0701,0.2104
-Weighted Late Fusion (186 Grid),0.6597,0.0941,0.8268,0.1647,0.6587
-Stacking Meta-Learner,0.5532,0.69,0.556,0.8113,1.0
-Module 3 (Phenotypic),0.5753,0.6954,0.501,0.8113,1.0
-Module 2 (Questionnaires),0.5247,0.8357,0.5631,0.8357,1.0
+Primary Baseline: Simple Average (33/33/33),0.7403,0.004,0.8969,0.028,0.028
+Stacking Meta-Learner,0.7065,0.016,0.9639,0.0561,0.1122
+Intermediate Latent Fusion (37-D),0.7117,0.026,0.898,0.0607,0.182
+Validation-Tuned Late Fusion (186 Grid),0.6649,0.1102,0.8156,0.1652,0.7715
+Module 1: Structural MRI (Pretrained ResNet-18),0.7221,0.118,2.0,0.1652,0.826
+Module 3: Static Phenotypic (FT-ProtoNet),0.5753,0.6954,0.4309,0.8113,1.0
+Module 2: Anxiety Symptomatology (FT-ProtoNet),0.5247,0.8357,0.5251,0.8357,1.0

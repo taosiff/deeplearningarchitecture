@@ -3,47 +3,47 @@
     {
       "rank": 1,
       "feature": "pSDQ03",
-      "importance": 0.1172
+      "importance": 0.1165
     },
     {
       "rank": 2,
       "feature": "SPHERE08",
-      "importance": 0.0509
+      "importance": 0.0505
     },
     {
       "rank": 3,
       "feature": "diff_26",
-      "importance": 0.0414
+      "importance": 0.042
     },
     {
       "rank": 4,
       "feature": "SCAS_socpho_score",
-      "importance": 0.0334
+      "importance": 0.0333
     },
     {
       "rank": 5,
-      "feature": "SPHERE22",
-      "importance": 0.029
-    },
-    {
-      "rank": 6,
       "feature": "SPHERE07",
       "importance": 0.0283
     },
     {
+      "rank": 6,
+      "feature": "SPHERE22",
+      "importance": 0.0277
+    },
+    {
       "rank": 7,
       "feature": "diff_worry",
-      "importance": 0.0177
+      "importance": 0.0173
     },
     {
       "rank": 8,
       "feature": "pSCAS31",
-      "importance": 0.0149
+      "importance": 0.0146
     },
     {
       "rank": 9,
       "feature": "pSCAS_socpho_score",
-      "importance": 0.0128
+      "importance": 0.0123
     }
   ],
   "module3_top_features": [

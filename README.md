@@ -1,43 +1,54 @@
 # deeplearningarchitecture
 
-## Multimodal Deep Few-Shot Metric Learning for Incident Adolescent Anxiety Prediction
+## Multimodal Machine Learning for Incident Adolescent Anxiety Prediction: An Exploratory Proof-of-Concept in an Isolated Twin Cohort
 
-This repository contains the complete, leak-free, reproducible deep learning codebase and evaluation suite for predicting incident adolescent anxiety in an isolated longitudinal twin cohort study.
+This repository contains the leak-free, reproducible machine learning codebase and evaluation suite for predicting incident adolescent anxiety in an isolated longitudinal twin cohort (Queensland Twin Adolescent Brain project, QTAB).
 
 ---
 
-### Pipeline Architecture & Modules
+### Methodological Overview & Honest Framing
 
-The pipeline integrates three core modalities with zero data leakage (strict family-isolated train, validation, and test splits):
+Predicting *incident* internalizing anxiety disorders in adolescents over a 2-year longitudinal follow-up (onset between Session 1 and Session 2) is a challenging task due to low base-rate prevalence ($12.5\%$, 38 cases across 304 participants) and subtle early prodromal manifestations.
 
-1. **Module 1: Structural MRI (`code/01_mri_module.py`)**
-   - Pretrained Med3D 3D-ResNet-18 backbone (768-D representation).
-   - Unsupervised PCA dimensionality reduction ($k=5$) preserving structural variance.
-   - Class-balanced linear metric head with L2 regularization.
+Following a methodological audit, this codebase enforces strict zero-leakage protocols:
+1. **Strict Family Isolation:** Twin pairs are assigned intact to partitions to prevent genetic and shared-environmental contamination (Train: 90 families, 180 subjects, 24 incident cases; Validation: 31 families, 62 subjects, 7 incident cases; Test: 31 families, 62 subjects, 7 incident cases).
+2. **Train-Only Preprocessing:** All scalers, PCA projections ($k=5$ for sMRI), and classifiers are fit strictly on the training partition (`train.csv`). Zero validation or test data enters dimensionality reduction or model fitting.
+3. **Pre-Specified Primary Model (Dawes' Rule of Equal Weighting):**
+   - Fine-grained grid tuning on finite validation cohorts ($n_{\text{val}} = 62$, 7 events) overfits validation data (Validation AUC $0.722 \to$ Test AUC $0.665$, 95% CI $[0.458, 0.879]$ spanning chance).
+   - The unweighted **Simple Average ($1/3, 1/3, 1/3$)** acts as a Bayesian uniform shrinkage prior (Dawes, 1979; Wainer, 1976), achieving held-out **Test ROC-AUC = 0.7403** (95% CI $[0.605, 0.887]$) and **Test F1 = 0.3636** (Sensitivity $85.7\%$, Specificity $63.6\%$, NPV $97.2\%$).
+4. **Modality Performance Reality:**
+   - **Module 1 (sMRI, Pretrained Med3D 3D-ResNet-18 + PCA-5):** Test ROC-AUC = **0.7221** (Val AUC = 0.5117). Features pre-extracted from structural T1w scans.
+   - **Module 2 (Questionnaires, FT-ProtoNet):** Test ROC-AUC = **0.5247** (Val AUC = 0.7455).
+   - **Module 3 (Phenotypic, FT-ProtoNet):** Test ROC-AUC = **0.5753** (Val AUC = 0.8143).
+   - **Statistical Multiplicity:** Multimodal fusion is significantly better than chance ($p = 0.004$, BH FDR $q = 0.028$), but does *not* achieve statistically significant superiority over sMRI alone ($p = 0.897$).
+5. **Feature Selection & Subpopulation Inversion:**
+   - Automated train-only screening across total symptom severity scales (Pearson, ANOVA, Mutual Information, 5-Fold Nested CV) causes subpopulation inversion on held-out test data (Test AUC $\approx 0.32 - 0.40$). This occurs because chronic/persistent anxious controls exhibit high baseline symptoms while incident cases exhibit lower prodromal symptoms.
+   - Transition-specific markers (parent-reported somatic complaints `pSDQ03`, muscle tension `SPHERE`, and parent-child symptom discrepancies `diff_26`, `diff_worry`) restore positive test orientation.
+6. **Calibration Disclosure:**
+   - Platt scaling achieves a Brier score of **0.0999** and near-zero ECE (**0.0004**), which matches the uninformative constant base-rate prediction ($7/62 = 11.3\%$, Brier = **0.1002**). This reflects probability shrinkage toward the cohort base rate rather than high-resolution individual risk discrimination.
 
-2. **Module 2: Anxiety Symptomatology (`code/02_questionnaire_module.py`)**
-   - **FT-ProtoNet**: Feature-Tokenizer Multi-Head Self-Attention Prototypical Network.
-   - Sample-independent episodic few-shot metric learning tailored for severe class imbalance (~1:6.5).
-   - 9 clinically guided transition vulnerability items (somatic complaints, muscle tension, parent-child discrepancy).
+---
 
-3. **Module 3: Static Phenotypic (`code/03_static_module.py`)**
-   - **FT-ProtoNet** architecture applied to socioeconomic and pubertal transition features.
-   - Metric learning on Euclidean prototype distances.
+### Repository Structure
 
-4. **Multimodal Fusion & Multiplicity Control (`code/04_multimodal_fusion.py`)**
-   - Multiple fusion paradigms: Simple Average ($33/33/33$), Balanced Late ($25/45/30$), Intermediate Latent Concatenation ($37\text{-D}$), Grid Search ($186$ candidates), and Stacking Meta-Learner.
-   - Full calibration suite: Platt Scaling vs Isotonic Regression with 10-bin Expected Calibration Error (ECE) and Brier scores.
-   - Multiplicity control: Benjamini-Hochberg False Discovery Rate ($q$-values) and Bonferroni corrections across all hypotheses.
-   - 2,000 cluster-bootstrap iterations at family level.
-
-5. **Model-Agnostic SHAP Interpretability (`code/05_shap_analysis.py`)**
-   - High-resolution summary and feature importance plots directly explaining deep ProtoNet prototypes.
-
-6. **Feature Selection Leakage Audit (`code/06_feature_selection_audit.py`)**
-   - Empirical comparison between Train+Val leaky selection, strict Train-only selection ($k \in [5, 40]$), 5-fold Nested-CV, and clinically guided transition selection.
-
-7. **5x5 Repeated Family-Stratified CV (`code/07_repeated_family_cv.py`)**
-   - 25 independent family-isolated folds across the 304-subject cohort using `StratifiedGroupKFold`.
+```
+├── code/
+│   ├── 01_mri_module.py             # Pretrained Med3D sMRI -> Train-Only PCA-5 -> Balanced Metric Head
+│   ├── 02_questionnaire_module.py   # FT-ProtoNet on 9 transition vulnerability items
+│   ├── 03_static_module.py          # FT-ProtoNet on 4 socioeconomic/pubertal indicators
+│   ├── 04_multimodal_fusion.py      # Primary Simple Average, Grid Search, Latent, Calibration, Multiplicity
+│   ├── 05_shap_analysis.py          # Model-agnostic SHAP interpretability on deep ProtoNet prototypes
+│   ├── 06_feature_selection_audit.py# Empirical audit: Leaky vs Train-Only vs Nested CV vs Clinical
+│   └── 07_repeated_family_cv.py     # 5x5 Repeated Family-Stratified CV (25 folds) with frozen train threshold
+├── data/
+│   ├── splits/                      # Family-isolated train.csv, val.csv, test.csv (zero overlap)
+│   ├── raw/                         # Questionnaire, phenotypic, and outcome tables
+│   ├── mri/                         # Pre-extracted 768-D Med3D embeddings (standalone__pretrained.npz)
+│   └── processed/                   # Intermediate representations and out-of-fold probabilities
+├── models/                          # Saved model weights (.pt, .pkl) and metadata
+├── results/                         # Summary CSV tables, metrics JSONs, and 300 DPI publication figures
+└── requirements.txt                 # Pinned dependencies
+```
 
 ---
 
@@ -50,17 +61,23 @@ cd deeplearningarchitecture
 
 # Create and activate virtual environment
 python -m venv venv
-# Windows:
-venv\Scripts\activate
-# Linux/macOS:
-source venv/bin/activate
+venv\Scripts\activate       # Windows
+# source venv/bin/activate  # Linux/macOS
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Run multimodal evaluation suite
+# Run Module 1 (sMRI)
+python code/01_mri_module.py
+
+# Run Module 2 (Questionnaires) and Module 3 (Phenotypic)
+python code/02_questionnaire_module.py
+python code/03_static_module.py
+
+# Run Multimodal Fusion Suite & Statistical Analysis
 python code/04_multimodal_fusion.py
 
-# Run repeated family-stratified cross-validation
+# Run Feature Selection Audit & Repeated Cross-Validation
+python code/06_feature_selection_audit.py
 python code/07_repeated_family_cv.py
 ```
