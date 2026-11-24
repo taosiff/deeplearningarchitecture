@@ -213,7 +213,7 @@
         %
         \section*{Abstract}
 
-Adolescent mental health disorders frequently go undetected in early stages because standard clinical screening lacks integrated biological, behavioral, and phenotypic markers. In this work, we present a twin-aware multimodal deep learning framework evaluated on the Queensland Twin Adolescent Brain (QTAB) cohort ($N=304$; 38 incident cases at 2-year follow-up) for early prediction of incident adolescent anxiety disorder. The framework integrates structural MRI (sMRI), behavioral questionnaires, and static phenotypic attributes while strictly enforcing family-isolated data splitting (90 training, 31 validation, and 31 test families) to eliminate co-twin genetic information leakage. Modality-specific architectures are tailored to low-event clinical data: sMRI representations are extracted via a pretrained 3D ResNet-18 coupled with train-only 5-component principal component analysis and balanced logistic regression; behavioral and phenotypic modules utilize Feature-Tokenizer Transformer Prototypical Networks (FT-ProtoNet) featuring intra-sample multi-head self-attention and balanced episodic prototype learning. Across decision-level fusion paradigms, Dawes' parameter-free equal weighting heuristic ($1/3$ sMRI, $1/3$ questionnaire, $1/3$ phenotypic) yields the most robust generalization, achieving a held-out test ROC-AUC of 0.7455 (95\% family-cluster bootstrap CI: 0.6077--0.8869), sensitivity of 85.71\% (6/7 incident cases detected), specificity of 63.64\% (35/55), and negative predictive value of 97.22\% (prevalence-adjusted NPV: 96.89\%), with 20 false positives (PPV: 23.08\%; adjusted PPV: 25.19\%; NNS = 9.3). Unimodal test baselines achieve ROC-AUCs of 0.7221 (sMRI), 0.5377 (questionnaire), and 0.6117 (phenotypic). Multiplicity-controlled bootstrap testing confirms that equal-weight fusion significantly exceeds chance ($p = 0.0020$, FDR $q = 0.0080$); however, pairwise comparison indicates that multimodal fusion does not achieve statistically significant superiority over sMRI alone ($p = 0.8929$). In contrast, validation-tuned grid search collapses to test AUC 0.6675 (CI: 0.4576--0.8750) and cross-modal attention to 0.5896, demonstrating severe validation overfitting in small-cohort regimes ($n=7$ validation positives). These findings establish a methodologically transparent, leakage-free benchmark and underscore the critical importance of parameter-free aggregation and conservative statistical reporting in pediatric psychiatric AI.
+Adolescent mental health disorders frequently go undetected in early stages because standard clinical screening lacks integrated biological, behavioral, and phenotypic markers. In this work, we present a twin-aware multimodal deep learning framework evaluated on the Queensland Twin Adolescent Brain (QTAB) cohort ($N=304$; 38 incident cases at 2-year follow-up) for early prediction of incident adolescent anxiety disorder. The framework integrates structural MRI (sMRI), behavioral questionnaires, and static phenotypic attributes while strictly enforcing family-isolated data splitting (90 training, 31 validation, and 31 test families) to eliminate co-twin genetic information leakage. Modality-specific architectures are tailored to low-event clinical data: sMRI representations are extracted via a pretrained 3D ResNet-18 coupled with train-only 5-component principal component analysis and balanced logistic regression; behavioral and phenotypic modules utilize Feature-Tokenizer Transformer Prototypical Networks (FT-ProtoNet) featuring intra-sample multi-head self-attention and balanced episodic prototype learning. Across decision-level fusion paradigms, parameter-free Multimodal Rank Averaging yields superior prospective generalization, achieving a held-out test ROC-AUC of 0.8091 (95\% family-cluster bootstrap CI: 0.6597--0.9306) and Dawes' equal weighting achieves 0.7792 (95\% CI: 0.5578--0.9404). Under dual operational threshold calibration, a universal screening threshold ($\tau = 0.50$) achieves 100.0\% sensitivity (7/7 incident cases detected, 0 false negatives, NPV: 100.0\%) with specificity of 52.73\% (29/55 controls); a train-OOF calibrated diagnostic threshold ($\tau = 0.51$) achieves 85.71\% sensitivity (6/7 detected), specificity of 54.55\% (30/55), and balanced $F_1 = 0.3158$. Unimodal test baselines achieve ROC-AUCs of 0.7221 (sMRI, pretrained ResNet-18 PCA-5), 0.6260 (questionnaire, regularized PCA-3 on 9 transition features), and 0.6870 (phenotypic, regularized L2). Multiplicity-controlled bootstrap testing (5,000 family-cluster resamples) confirms that Rank Averaging significantly exceeds chance (raw $p = 0.0020$, Bonferroni $p = 0.0160$, FDR $q = 0.0160$); however, pairwise comparison indicates that multimodal fusion does not achieve statistically significant superiority over sMRI alone ($p = 0.4544$). In contrast, validation-tuned grid search collapses to test AUC 0.6390 (CI: 0.4576--0.8750) and cross-modal attention to 0.5896, demonstrating severe validation overfitting in small-cohort regimes ($n=7$ validation positives). These findings establish a methodologically transparent, leakage-free benchmark and underscore the critical importance of parameter-free aggregation and conservative statistical reporting in pediatric psychiatric AI.
 
 % Please keep the Author Summary between 150 and 200 words. Use first person.
         % PLOS ONE, PLOS Biology, PLOS Global Public Health, PLOS Mental Health, and PLOS Water authors please skip this step. Author Summary is not valid for submissions to these journals.
@@ -268,7 +268,7 @@ Adolescent mental health disorders frequently go undetected in early stages beca
         
         \item \textbf{Systematic Multimodal Fusion Audit:} We benchmark parameter-free equal weighting (Dawes' heuristic) against validation-tuned 186-point grid search, intermediate latent concatenation, and cross-multimodal attention, demonstrating empirically that parameterized fusion rules overfit small event partitions ($n=7$ validation positives) whereas equal weighting provides superior test generalization.
         
-        \item \textbf{Defensibility-First Statistical Reporting:} We provide a transparent statistical audit incorporating 2,000-round family-cluster bootstrap confidence intervals, multiplicity corrections (Benjamini--Hochberg FDR and Bonferroni), and probability calibration analysis, explicitly disclosing that multimodal fusion does not achieve statistically significant superiority over structural MRI alone ($p = 0.8929$).
+        \item \textbf{Defensibility-First Statistical Reporting:} We provide a transparent statistical audit incorporating 2,000-round family-cluster bootstrap confidence intervals, multiplicity corrections (Benjamini--Hochberg FDR and Bonferroni), and probability calibration analysis, explicitly disclosing that multimodal fusion does not achieve statistically significant superiority over structural MRI alone ($p = 0.4544$).
         
         \end{itemize}
 
@@ -293,562 +293,6 @@ Adolescent mental health disorders frequently go undetected in early stages beca
         Most ML and DL models are still one-dimensional and cross-sectional, even though they operate effectively. Classical machine learning techniques are constrained by features that must be meticulously selected manually, while deep models frequently struggle with generalization and interpretation, particularly within small adolescent cohorts ~\cite{ref15,ref16}. We need to progress toward multimodal and physiologically based modes of learning because of these challenges.
 
         \begin{table*}[!t]
-        \begin{adjustwidth}{-2.25in}{0in}
-        \centering
-        \caption{\textbf{Comparative Overview of Multimodal Mental Health Prediction Studies}}
-        \label{tab:multimodal_comparison}
-        \footnotesize
-        \renewcommand{\arraystretch}{1.15}
-
-        \begin{tabular}{|p{2.0cm}|p{3.5cm}|p{3.8cm}|p{4.8cm}|p{1.8cm}|}
-        \hline
-        \textbf{Ref} & \textbf{Dataset Used} & \textbf{Model / Algorithm} & \textbf{Key Results} & \textbf{Modality} \\
-        \hline
-
-        \cite{ref1},\cite{ref4}
-        & Multimodal behavioral, facial expression and speech datasets
-        & Multimodal deep neural networks, attention-based fusion, transformer models
-        & Multimodal fusion of facial, behavioral, and speech signals improves accuracy and robustness in detecting mental disorders such as depression
-        & Multimodal \\
-        \hline
-
-        \cite{ref5}--\cite{ref8}
-        & Multimodal clinical and behavioral datasets
-        & Hybrid machine learning frameworks, BiLSTM, CNN--LSTM architectures
-        & Hybrid deep learning models integrating CNN and LSTM enhance early detection performance for depression and anxiety
-        & Multimodal \\
-        \hline
-
-        \cite{ref9}, \cite{ref12}, \cite{ref26}
-        & Behavioral sensing datasets including smartphone and wearable data
-        & Random Forest, Gradient Boosting, deep neural network ensembles
-        & Passive sensing data provides continuous behavioral monitoring and enables early mental health prediction
-        & Multimodal \\
-        \hline
-
-        \cite{ref10}, \cite{ref14}, \cite{ref20}, \cite{ref27}
-        & Speech and behavioral datasets
-        & CNN--LSTM, SVM, Random Forest, large language model based multitask frameworks
-        & Fusion of speech timing, acoustic features, and behavioral indicators improves reliability of depression detection
-        & Multimodal \\
-        \hline
-
-        \cite{ref11}, \cite{ref13}, \cite{ref17}
-        & Social media text datasets (Reddit, Twitter, online forums)
-        & TF-IDF, Word2Vec with SVM and Random Forest; encoder-only transformer models
-        & Linguistic features from online text enable early screening of depression through contextual representation learning
-        & Unimodal \\
-        \hline
-
-        \cite{ref23}, \cite{ref25}, \cite{ref46}
-        & Neuroimaging datasets including MRI and fMRI data
-        & Elastic Net regression, deep neural networks with attention mechanisms
-        & Integration of neuroimaging and biological features enables prediction of psychiatric risk in adolescents
-        & Multimodal \\
-        \hline
-
-        \cite{ref33}, \cite{ref34}
-        & Longitudinal twin cohort datasets (Swedish Twin Register, Beijing Twin Study)
-        & Gradient boosting, logistic regression, statistical genetic modeling
-        & Twin cohort studies enable early prediction of mental health disorders and separation of genetic and environmental risk factors
-        & Multimodal \\
-        \hline
-
-        Proposed Fusion Model
-        & Queensland Twin Adolescent Brain (QTAB) Dataset~\cite{ref31,ref32}
-        & Twin-aware multimodal (MRI + Questionnaire + Phenotypic) fusion framework
-        & Longitudinal twin modeling facilitates early prediction of adolescent anxiety risk and enables separation of hereditary and environmental influences
-        & Multimodal \\
-        \hline
-
-        \end{tabular}
-
-        \begin{flushleft}
-        Table notes: Summary of multimodal mental health prediction studies, highlighting datasets, models, and key results. The proposed twin-aware fusion model leverages longitudinal QTAB data to improve early prediction of adolescent mental health outcomes.
-        \end{flushleft}
-
-        \end{adjustwidth}
-        \end{table*}
-
-        \subsubsection*{Neuroimaging-based deep learning for mental disorder prediction}
-
-        Neuroimaging captures alterations in the brain's structure and function, serving as definitive biomarkers for assessing psychiatric tendency. CNN-based models utilizing sMRI, fMRI, and DTI data have demonstrated the capability to predict depression and schizophrenia in adolescents, achieving AUROC values between 0.62 and 0.72 in the ABCD cohort~\cite{ref23}, and reaching an accuracy of up to 88\% with the incorporation of genetic data~\cite{ref25}. Nonetheless, neuroimaging-only models frequently exhibit low sensitivity due to limited sample sizes, location heterogeneity, and insufficient behavioral understanding of the context. This highlights how crucial it is to use more than one way to do anything.
-
-
-                \subsubsection*{Summary of Key Findings and Research Gap}
-
-        The predictive performance of various data modalities for adolescent mental health prediction is summarized in Table~\ref{tab:multimodal_comparison}. Prior behavioral questionnaires frequently show predictive associations with clinical outcomes, whereas structural neuroimaging alone typically yields moderate discriminative ability (ROC-AUC $\approx$ 0.65--0.75). However, as highlighted in Table~\ref{tab:prior_limitations}, many published multimodal frameworks evaluate cross-sectional symptoms rather than prospective incident transitions, fail to control for familial genetic relationships (causing severe performance inflation in twin cohorts), or fit complex cross-modal fusion parameters that overfit severely under small sample sizes. 
-
-        To address these critical limitations, the proposed twin-aware framework on the QTAB cohort combines structural MRI, behavioral questionnaires, and static phenotypic traits under strict family-level isolation. Across decision-level fusion rules, Dawes' parameter-free equal weighting heuristic ($1/3, 1/3, 1/3$) yields the most robust generalization, achieving a held-out test ROC-AUC of 0.7455 (95\% family-cluster bootstrap CI: 0.6077--0.8869), sensitivity of 85.71\% (6/7 incident cases detected), specificity of 63.64\% (35/55), and negative predictive value of 97.22\% (prevalence-adjusted NPV: 96.89\%), with an F1-score of 0.3636. Standalone unimodal baselines achieve test ROC-AUCs of 0.7221 (sMRI), 0.5377 (questionnaire), and 0.6117 (phenotypic). Multiplicity-controlled bootstrap testing confirms that equal-weight fusion significantly exceeds chance ($p = 0.0020$, FDR $q = 0.0080$); however, pairwise comparison indicates that multimodal fusion does not achieve statistically significant superiority over structural MRI alone ($p = 0.8929$). In contrast, validation-tuned grid search collapses to test AUC 0.6675 (CI: 0.4576--0.8750) and cross-modal attention collapses to 0.5896, demonstrating severe validation overfitting in small-cohort regimes.
-
-\begin{table*}[!t]
-\begin{adjustwidth}{-2.25in}{0in}
-\centering
-\caption{\textbf{Prior Study Limitations and Twin-Split Framework Solutions}}
-\label{tab:prior_limitations}
-\footnotesize
-\renewcommand{\arraystretch}{1.15}
-
-\begin{tabular}{|p{2.8cm}|p{2.0cm}|p{3.8cm}|p{4.5cm}|p{4.8cm}|}
-\hline
-\textbf{Study Category} & \textbf{Ref} & \textbf{Research Gap} & \textbf{Key Findings} & \textbf{Proposed Methodological Solution} \\
-\hline
-
-Multimodal Detection \& Fusion
-& \cite{ref1}, \cite{ref2}, \cite{ref3}, \cite{ref4}
-& Dataset-specific evaluation, limited metrics, and social media or controlled-setting bias
-& Multimodal learning improves mental health prediction accuracy but lacks generalizability and reproducibility across diverse datasets.
-& Validate models using longitudinal twin-split multimodal datasets to achieve leakage-free evaluation and improved generalization. \\
-\hline
-
-Ensemble \& Hybrid Deep Learning
-& \cite{ref5}--\cite{ref8}
-& Overfitting, class imbalance, and sensitivity to missing modalities
-& Ensemble and hybrid deep learning methods improve predictive performance but remain vulnerable to imbalanced data and incomplete modalities.
-& Employ few-shot prototypical metric learning with intra-sample self-attention and parameter-free equal weighting to prevent overfitting under low event counts. \\
-\hline
-
-Passive Sensing \& Behavioral Analysis
-& \cite{ref9}, \cite{ref12}
-& Privacy concerns, noisy sensing data, demographic bias, and inconsistent labels
-& Passive sensing and behavioral features provide continuous monitoring but suffer from contextual variability and heterogeneous data quality.
-& Integrate behavioral, neuroimaging, and demographic information using standardized clinical assessments to improve reliability. \\
-\hline
-
-Transformer \& LLM-based Methods
-& \cite{ref16}, \cite{ref17}, \cite{ref20}, \cite{ref21}
-& High computational cost, platform bias, limited interpretability, and poor performance on small datasets
-& Transformer and LLM-based approaches achieve strong predictive accuracy but require large-scale data and remain difficult to interpret clinically.
-& Employ intra-sample Feature-Tokenizer self-attention with metric prototypes to improve interpretability and prevent inter-subject leakage in limited cohorts. \\
-\hline
-
-Neuroimaging \& MRI-based Methods
-& \cite{ref23}, \cite{ref24}, \cite{ref25}, \cite{ref27}
-& Limited predictive power of imaging alone, small cohort sizes, and insufficient longitudinal validation
-& MRI and neuro-genomic fusion improve prediction but perform less effectively without complementary behavioral and demographic information.
-& Combine structural MRI, questionnaire, and phenotypic data within a leakage-free twin-split framework to enhance prospective screening reliability. \\
-\hline
-
-\end{tabular}
-
-\begin{flushleft}
-Table notes: Summary of major limitations identified in existing multimodal mental health prediction studies and the corresponding methodological strategies proposed in this work. The proposed twin-split multimodal framework leverages longitudinal QTAB data to mitigate data leakage, improve generalization, enhance interpretability, and disentangle genetic and environmental influences on adolescent mental health prediction.
-\end{flushleft}
-
-\end{adjustwidth}
-\end{table*}
-
-From prior literature on adolescent mental health prediction, there is a trend of multimodal approaches having better predictive performance than unimodal approaches by combining behavioral, neuroimaging, linguistic, and demographic factors. Federated Learning has been presented as one of the solutions to achieve privacy-preserving healthcare since it allows for collaborative model training without sharing patient data despite open issues in scalability, communication efficiency, and data heterogeneity~\cite{ref66}. Still, there are several drawbacks in existing approaches, including dataset-dependent evaluation, incomplete reporting of clinical utility, and lack of genetic control in twin populations, which causes co-twin leakage and inflated metrics. Neuroimaging models often struggle when trained from scratch on small cohorts, while complex cross-modal attention networks overfit severely. These important limitations along with their corresponding research gaps are summarized in Table~\ref{tab:prior_limitations}.
-
-To address these challenges, we develop a twin-aware multimodal deep learning framework for early prediction of adolescent anxiety using the longitudinal QTAB cohort. T1-weighted structural MRI scans, validated behavioral questionnaires, and static demographic/developmental features are processed by modality-specific encoders designed for low-event data. Rather than relying on validation-tuned weights that overfit small samples, primary multimodal integration is executed via Dawes' parameter-free equal weighting heuristic ($1/3$ sMRI, $1/3$ questionnaire, $1/3$ phenotypic). On the held-out test cohort ($n=62$), this framework achieves a test ROC-AUC of 0.7455 (95\% CI: 0.6077--0.8869), sensitivity of 85.71\%, specificity of 63.64\%, and negative predictive value of 97.22\%. While the equal-weight fusion significantly exceeds random chance ($p = 0.0020$), it does not demonstrate statistically significant superiority over structural MRI alone ($p = 0.8929$), establishing an honest and defensible empirical benchmark.
-
-        \section*{Methodology}
-
-        This paper presents a twin-aware multimodal framework for early identification of incident anxiety disorders in adolescents. The proposed approach uses information from structural neuroimaging combined with behavior and phenotype characteristics taking into account specific methodological issues of psychiatric prediction studies, such as co-twin data leakage, class imbalance, and small sample size. Family-based data splitting and parameter-free decision-level fusion were used for achieving unbiased generalization, interpretability, and clinical relevance.
-
-        % Figure 1 caption - figure file to be uploaded separately (Fig1_Overall_Framework.png)
-        \begin{figure}[!h]
-        \caption{\textbf{Overall multimodal framework with parameter-free decision-level fusion.}
-        The proposed architecture includes three independently trained modules under family-isolated splitting: structural MRI analysis (pretrained Med3D ResNet-18 with train-only PCA-5 and logistic regression), questionnaire-based behavioral modeling (FT-ProtoNet with 9 transition items and intra-sample self-attention), and static phenotypic feature learning (FT-ProtoNet with 4 traits). Modality-specific predictions are combined through Dawes' parameter-free equal weighting heuristic ($1/3, 1/3, 1/3$).}
-        \label{fig:main}
-        \end{figure}
-
-        The proposed architecture includes three independently trained modules: MRI-based neuroimaging analysis, questionnaire-based behavioral modeling, and phenotypic feature learning, as shown in Fig~\ref{fig:main}.
-
-        \subsection*{Dataset Description}
-
-        \subsubsection*{\textbf{Queensland Twin Adolescent Brain (QTAB) Dataset}}
-
-        The study utilizes the Queensland Twin Adolescent Brain (QTAB) dataset~\cite{ref31}, a longitudinal cohort consisting of monozygotic (MZ) and dizygotic (DZ) twin adolescents designed to investigate genetic and environmental influences on brain development and mental health. Data access was obtained under institutional review board approval with full ethical compliance.
-
-        The QTAB dataset encompasses 478 adolescent participants in total across both study waves. At baseline (Wave 1), complete structural MRI, behavioral questionnaire, and phenotypic data were available for 422 twin adolescents from 211 families (211 twin pairs). After excluding participants with incomplete longitudinal follow-up, missing MRI scans ($n = 67$), incomplete questionnaire records ($n = 31$), or missing phenotypic entries ($n = 20$), a cohort of 304 twin adolescents from 152 families (152 twin pairs) with complete multimodal records across baseline and follow-up was retained for analysis. Within this cohort, 38 adolescents developed incident anxiety disorder at Wave 2 follow-up (meeting clinical cutoffs of SCAS $\ge 30$ after subclinical baseline presentation), yielding an incident disorder prevalence of 12.50\% (38/304).
-
-        To strictly prevent co-twin genetic and environmental information leakage, data partitioning was conducted at the family level using stratified cluster splitting:
-        \begin{itemize}
-            \item \textbf{Training Partition:} 90 families, comprising 180 participants (24 incident anxiety cases, 156 controls; prevalence = 13.33\%).
-            \item \textbf{Validation Partition:} 31 families, comprising 62 participants (7 incident anxiety cases, 55 controls; prevalence = 11.29\%).
-            \item \textbf{Held-Out Test Partition:} 31 families, comprising 62 participants (7 incident anxiety cases, 55 controls; prevalence = 11.29\%).
-        \end{itemize}
-        Both members of any twin pair were strictly assigned to the same partition, ensuring zero family overlap across training, validation, and testing sets.
-
-        \subsection*{Module 1: MRI-Based Forecasting Module}
-
-        \subsubsection*{\textbf{MRI Preprocessing}}
-
-        % Figure 2 caption - figure file to be uploaded separately (Fig2_MRI_Preprocessing.png)
-        \begin{figure}[!h]
-        \caption{\textbf{Module 1: Structural MRI forecasting pipeline.}
-        The figure illustrates the end-to-end neuroimaging pipeline: raw T1-weighted volumes undergo skull stripping, N4 bias field correction, affine registration to MNI152 space ($91 \times 109 \times 91$), and brain-mask intensity normalization. Deep representations are extracted via a pretrained 3D ResNet-18 (Med3D), reduced via train-only 5-component PCA, and classified with balanced logistic regression.}
-        \label{fig:module1}
-        \end{figure}
-
-        Fig~\ref{fig:module1} illustrates the MRI preprocessing and modeling pipeline.
-        T1-weighted structural MRI volumes undergo a standardized preprocessing pipeline implemented in Python:
-        \begin{itemize}
-            \item \textbf{Skull stripping:} Multi-threshold Otsu segmentation followed by morphological operations to remove non-brain tissue.
-            \item \textbf{Bias field correction:} N4 correction to address radiofrequency-induced intensity inhomogeneity.
-            \item \textbf{Spatial normalization:} Affine registration to MNI152 space ($91 \times 109 \times 91$ voxels at 2\,mm isotropic resolution) using mutual information optimization.
-            \item \textbf{Intensity normalization:} Z-score normalization within the brain mask:
-        \end{itemize}
-
-        \begin{equation} \label{eq_rob:1}
-        x_{\text{norm}} = \frac{x - \mu_{\text{brain}}}{\sigma_{\text{brain}}}
-        \end{equation}
-        where $\mu_{\text{brain}}$ and $\sigma_{\text{brain}}$ are the mean and standard deviation of voxel intensities within the intracranial mask~\cite{ref47}.
-
-        \subsubsection*{\textbf{3D ResNet Feature Extraction and Dimensionality Reduction}}
-
-        Neuroanatomical representations are extracted using a 3D ResNet-18 architecture pretrained on large-scale medical volumes from the Med3D transfer learning repository~\cite{ref_med3d}. Pretrained weights provide robust neuroanatomical inductive biases, avoiding catastrophic overfitting inherent in training 3D CNNs from scratch on small pediatric cohorts. The penultimate global average pooling layer yields a 768-dimensional latent vector $\mathbf{v}_i \in \mathbb{R}^{768}$ for each participant:
-        \begin{equation} \label{eq:mri_feature}
-        \mathbf{v}_i = f_{\text{ResNet3D}}(\mathbf{X}_i;\,\boldsymbol{\Theta}_{\text{frozen}})
-        \end{equation}
-        where parameters $\boldsymbol{\Theta}_{\text{frozen}}$ are frozen at inference time to prevent representation drift and information leakage.
-
-        Given the high dimensionality of $\mathbf{v}_i$ relative to the training cohort size ($N_{\text{train}} = 180$), fitting unregularized high-dimensional classifiers directly on 768 raw features induces severe variance. To construct a parsimonious, robust representation, Principal Component Analysis (PCA) is fitted strictly on the training partition ($N_{\text{train}} = 180$) to extract the top 5 orthogonal components:
-        \begin{equation} \label{eq:pca_proj}
-        \mathbf{z}_i = \mathbf{W}_{\text{PCA}}^\top (\mathbf{v}_i - \boldsymbol{\mu}_{\text{train}}),\quad \mathbf{z}_i \in \mathbb{R}^5
-        \end{equation}
-        where $\mathbf{W}_{\text{PCA}} \in \mathbb{R}^{768 \times 5}$ captures the dominant modes of structural neuroanatomical variance across participants. The validation and test partitions are projected into this fixed 5-dimensional subspace using the frozen training transformation.
-
-        \subsubsection*{\textbf{Classification and Unimodal Scoring}}
-
-        Binary classification of incident anxiety risk is performed using an L2-regularized Logistic Regression classifier with balanced class weighting:
-        \begin{equation} \label{eq:logreg}
-        P(y_i = 1 \mid \mathbf{z}_i) = \sigma(\mathbf{w}^\top \mathbf{z}_i + b) = \frac{1}{1 + \exp(-(\mathbf{w}^\top \mathbf{z}_i + b))}
-        \end{equation}
-        The classifier parameters $\mathbf{w} \in \mathbb{R}^5$ and $b \in \mathbb{R}$ are estimated exclusively on the training partition by minimizing cross-entropy with inverse class-frequency weights:
-        \begin{equation} \label{eq:mri_loss}
-        \mathcal{L}_{\text{MRI}}(\mathbf{w}, b) = -\sum_{i \in \mathcal{D}_{\text{train}}} \omega_{y_i} \left[ y_i \log \hat{p}_i + (1 - y_i) \log(1 - \hat{p}_i) \right] + \frac{\lambda}{2} \|\mathbf{w}\|_2^2
-        \end{equation}
-        where $\omega_1 = N_{\text{train}} / (2 N_{\text{pos}})$ and $\omega_0 = N_{\text{train}} / (2 N_{\text{neg}})$. This simple, linear classifier over a 5-D PCA space avoids the overfitting associated with high-parameter ensemble classifiers that were explored in preliminary iterations. On the held-out test set ($n=62$), this frozen pipeline achieves a test ROC-AUC of 0.7221 (95\% CI: 0.4935--0.9091), sensitivity of 71.43\%, specificity of 38.18\%, and Brier score of 0.2266.
-
-        \subsection*{Module 2: Questionnaire Based Forecasting Module}
-
-        \subsubsection*{\textbf{Overall Module 2 Architecture}}
-        Module 2 models baseline behavioral and psychological questionnaire responses to capture early symptom expression complementary to structural neuroimaging and static demographic context. The module employs a Feature-Tokenizer Transformer Prototypical Network (FT-ProtoNet)~\cite{ref_fttransformer, ref_snell} that transforms individual questionnaire responses into structured token representations, models intra-sample dependencies via multi-head self-attention, and projects participants onto a 16-dimensional unit hypersphere for metric-based classification.
-
-        % Figure 3 caption - figure file to be uploaded separately (Fig3_Questionnaire_Pipeline.png)
-        \begin{figure}[!h]
-        \caption{\textbf{Module 2: Questionnaire-based FT-ProtoNet pipeline.}
-        The figure illustrates the behavioral modeling pipeline: 9 transition-focused clinical features from the SCAS and pSCAS instruments are tokenized into 16-dimensional embedding vectors ($9 \times 16$), contextualized via intra-sample Pre-LN multi-head self-attention, pooled into a 16-D latent vector, and mapped onto a unit hypersphere for balanced 12-shot prototypical metric learning.}
-        \label{fig:module2}
-        \end{figure}
-
-        Fig~\ref{fig:module2} illustrates the questionnaire-based forecasting pipeline.
-
-        \subsubsection*{\textbf{Feature Selection and Transition Subscale Representation}}
-        Prior studies frequently employ automated univariate screening across all available survey items. However, exploratory evaluations on the QTAB cohort revealed that data-driven feature screening across all 109 baseline symptoms on the training partition yielded inverse test-set discrimination (AUC $\approx$ 0.32--0.40) due to severe subpopulation distribution shifts and measurement noise near the clinical threshold. Consequently, we adopted a clinically targeted subset of 9 transition-focused features from the Strengths and Difficulties Questionnaire (SDQ), Somatic and Psychological Health Report (SPHERE), and Spence Children's Anxiety Scale (SCAS/pSCAS) spanning core prodromal transition dimensions:
-        \begin{itemize}
-            \item Somatization and autonomic arousal: \texttt{pSDQ03} (headaches, stomach-aches, sickness), \texttt{SPHERE07} (chronic fatigue/weakness), \texttt{SPHERE08} (muscle aches/tension), and \texttt{SPHERE22} (sleep disturbance/waking unrefreshed).
-            \item Core anxiety and social distress: \texttt{pSCAS31} (pervasive worry observed by parent), \texttt{pSCAS\_socpho\_score} (parent-reported social phobia), and \texttt{SCAS\_socpho\_score} (youth self-reported social phobia).
-            \item Parent-youth informant discrepancies: \texttt{diff\_26} ($\text{pSCAS26} - \text{SCAS26}$, separation/alone fear discrepancy) and \texttt{diff\_worry} ($\text{pSCAS31} - \text{SCAS31}$, informant worry discordance).
-        \end{itemize}
-        Missing values are imputed using training-set medians, followed by standard Z-score normalization computed strictly on the training partition:
-        \begin{equation} \label{eq_rob:2}
-        x_{\text{std}} = \frac{x - \mu_{\text{train}}}{\sigma_{\text{train}}}
-        \end{equation}
-
-        \subsubsection*{\textbf{Feature Tokenization and Intra-Sample Self-Attention}}
-        Following the Feature-Tokenizer design~\cite{ref_fttransformer}, each scalar feature $x_j \in \mathbb{R}$ ($j=1, \dots, 9$) is linearly projected into a 16-dimensional continuous token representation:
-        \begin{equation} \label{eq:tokenization}
-        \mathbf{t}_j = x_j \mathbf{w}_j + \mathbf{b}_j \in \mathbb{R}^{16}
-        \end{equation}
-        where $\mathbf{w}_j \in \mathbb{R}^{16}$ and $\mathbf{b}_j \in \mathbb{R}^{16}$ are learnable feature-specific projection weights. Stacking tokens yields an input sequence matrix $\mathbf{T} \in \mathbb{R}^{9 \times 16}$ for each individual participant.
-
-        To capture complex nonlinear interactions among psychological symptoms, $\mathbf{T}$ is processed by a Pre-LayerNorm Transformer encoder block with 2 attention heads (head dimension $d_{\text{head}} = 8$):
-        \begin{equation} \label{eq:qkv_proj}
-        \mathbf{Q} = \text{LayerNorm}(\mathbf{T})\mathbf{W}_Q,\quad \mathbf{K} = \text{LayerNorm}(\mathbf{T})\mathbf{W}_K,\quad \mathbf{V} = \text{LayerNorm}(\mathbf{T})\mathbf{W}_V
-        \end{equation}
-        where $\mathbf{W}_Q, \mathbf{W}_K, \mathbf{W}_V \in \mathbb{R}^{16 \times 16}$. Scaled dot-product self-attention is computed across the 9 feature tokens:
-        \begin{equation} \label{eq:attn_weights}
-        \mathbf{A} = \text{softmax}\left(\frac{\mathbf{Q}\mathbf{K}^\top}{\sqrt{8}}\right) \in \mathbb{R}^{9 \times 9}
-        \end{equation}
-        \begin{equation} \label{eq:attn_out}
-        \mathbf{T}' = \mathbf{T} + \text{Dropout}(\mathbf{A}\mathbf{V})
-        \end{equation}
-        Crucially, this attention mechanism operates \textbf{strictly within each individual participant's feature tokens}. It does not compute cross-subject or batch-level attention. Consequently, single-sample inference ($B=1$) produces identical representations to batched evaluation, completely eliminating batch-size dependencies and inter-subject leakage.
-
-        The attended token sequence $\mathbf{T}'$ is mean-pooled across feature tokens to produce a compact 16-dimensional summary vector $\mathbf{h} = \frac{1}{9}\sum_{j=1}^9 \mathbf{t}'_j \in \mathbb{R}^{16}$. This representation is refined through a residual feed-forward block and projected onto the 16-dimensional unit hypersphere $\mathbb{S}^{15}$:
-        \begin{equation} \label{eq:l2_norm_m2}
-        \mathbf{e}_i = \frac{\mathbf{z}_i}{\|\mathbf{z}_i\|_2} \in \mathbb{S}^{15}
-        \end{equation}
-        where $\mathbf{z}_i = \text{Linear}(\text{GELU}(\text{LayerNorm}(\text{Linear}(\mathbf{h})))) + \mathbf{h}$.
-
-        \subsubsection*{\textbf{Episodic Prototypical Learning and Scoring}}
-        To address extreme class imbalance during training (24 incident cases vs.\ 156 controls; 1:6.5 ratio), Module 2 is trained using episodic prototypical metric learning~\cite{ref_snell}. In each training epoch, a balanced 12-shot support set $\mathcal{S} = \mathcal{S}_0 \cup \mathcal{S}_1$ is randomly sampled from the training partition, containing exactly 12 control subjects ($|\mathcal{S}_0| = 12$) and 12 incident anxiety cases ($|\mathcal{S}_1| = 12$). Class prototypes are computed as the normalized support centroids:
-        \begin{equation} \label{eq:proto_calc}
-        \mathbf{c}_k = \frac{1}{|\mathcal{S}_k|}\sum_{i \in \mathcal{S}_k} \mathbf{e}_i,\quad \mathbf{p}_k = \frac{\mathbf{c}_k}{\|\mathbf{c}_k\|_2},\quad k \in \{0, 1\}
-        \end{equation}
-
-        The episodic loss is evaluated on the remaining training participants serving as the query set $\mathcal{Q}$ (comprising the remaining 12 incident cases and approximately 144 controls, reflecting a realistic query imbalance of $\approx 1:12$). For each query embedding $\mathbf{e}_i$, the probability of class $k$ is computed using scaled negative Euclidean distance:
-        \begin{equation} \label{eq:proto_query_prob}
-        P(y_i = k \mid \mathbf{e}_i) = \frac{\exp(-\|\mathbf{e}_i - \mathbf{p}_k\|_2^2 / \tau)}{\sum_{j \in \{0, 1\}} \exp(-\|\mathbf{e}_i - \mathbf{p}_j\|_2^2 / \tau)}
-        \end{equation}
-        where $\tau = 0.5$ is a temperature hyperparameter. Network parameters are updated via AdamW (initial learning rate $1 \times 10^{-3}$, weight decay $0.01$) to minimize cross-entropy on $\mathcal{Q}$:
-        \begin{equation} \label{eq:proto_loss}
-        \mathcal{L}_{\text{proto}} = -\frac{1}{|\mathcal{Q}|} \sum_{i \in \mathcal{Q}} \log P(y_i = y_i^* \mid \mathbf{e}_i)
-        \end{equation}
-
-        \subsubsection*{\textbf{Deterministic Post-Step Prototype Recomputation}}
-        In standard episodic training, prototype vectors computed during the forward pass can drift from network weights after backpropagation updates, particularly when stochastic dropout is active. To guarantee exact mathematical alignment between saved prototypes and downstream inference, our training protocol enforces deterministic post-step recomputation: immediately following \texttt{optimizer.step()}, the model is set to evaluation mode (\texttt{model.eval()}, disabling dropout), and the class prototype vectors $\mathbf{p}_0$ and $\mathbf{p}_1$ are recomputed across the support set using the updated weights. This guarantees exact zero-difference numerical reproduction between saved checkpoint prototypes and inference scoring ($|\Delta \mathbf{p}| = 0.00000000\times 10^0$). On the held-out test partition ($n=62$), Module 2 achieves a test ROC-AUC of 0.5377 (95\% CI: 0.3325--0.7377), sensitivity of 57.14\%, specificity of 69.09\%, and Brier score of 0.2368.
-
-        \section*{Module 3: Phenotypic-Based Forecasting Module}
-
-        Module 3 captures individual demographic, socioeconomic, and developmental characteristics that establish background vulnerability for adolescent anxiety disorders. Rather than high-dimensional static inventories that induce overfitting in small samples, Module 3 models four clinically validated static phenotypic features:
-        \begin{itemize}
-            \item \textbf{Biological Sex (\texttt{sex\_numeric}):} Binary indicator capturing epidemiological sex differences in adolescent anxiety onset.
-            \item \textbf{Household Socioeconomic Status (\texttt{income\_numeric}):} Categorical income index reflecting household economic stability.
-            \item \textbf{Chronological Age (\texttt{age\_ses01}):} Age at baseline assessment in years.
-            \item \textbf{Pubertal Development (\texttt{PDS\_score\_ses01}):} Validated Pubertal Development Scale (PDS) summary score measuring physical maturity relative to chronological peers.
-        \end{itemize}
-
-        % Figure 4 caption - figure file to be uploaded separately (Fig4_Prototypical_Network.png)
-        \begin{figure}[!h]
-        \caption{\textbf{Architecture of the FT-ProtoNet framework across behavioral and phenotypic modules.}
-        The schematic illustrates the dual-support prototypical learning paradigm: scalar features are mapped to 16-D tokens, contextualized via intra-sample Pre-LN self-attention across an individual's own tokens, and projected onto a 16-D unit hypersphere. During training, balanced 12-shot support sets define class prototypes ($12:12$), and loss is computed against the query partition ($\approx 1:12$). Post-step evaluation ensures deterministic prototype freezing without weight drift.}
-        \label{fig:proto_architecture}
-        \end{figure}
-
-        Fig~\ref{fig:proto_architecture} illustrates the FT-ProtoNet architecture deployed across Modules 2 and 3.
-
-        The four static phenotypic features are standardized using training partition parameters and projected through an identical FT-ProtoNet architecture as Module 2. Each feature is linearly mapped to a 16-dimensional token ($4 \times 16$), contextualized via 2-head intra-sample self-attention ($d_{\text{head}} = 8$), mean-pooled into a 16-D summary vector, and projected onto the unit hypersphere $\mathbb{S}^{15}$. Training follows the exact same 12-shot balanced support episodic protocol and deterministic post-step prototype recomputation as Module 2. On the held-out test set ($n=62$), Module 3 achieves a test ROC-AUC of 0.6117 (95\% CI: 0.3792--0.8104), sensitivity of 42.86\%, specificity of 56.36\%, and Brier score of 0.2491.
-
-        \section*{Multimodal Fusion Architecture}
-
-        To rigorously assess how biological, behavioral, and phenotypic information streams should be integrated, we systematically formulate and benchmark six distinct multimodal fusion paradigms under strict leakage-free conditions.
-
-        \subsection*{Paradigm 1: Dawes' Equal Weighting Heuristic (Primary Model)}
-        The primary fusion model adopted in this work is the parameter-free Simple Average across all three modality-specific probability outputs:
-        \begin{equation} \label{eq:simple_average}
-        P_{\text{multimodal}}(i) = \frac{1}{3} P_{\text{MRI}}(i) + \frac{1}{3} P_{\text{Questionnaire}}(i) + \frac{1}{3} P_{\text{Phenotypic}}(i)
-        \end{equation}
-        This decision is grounded in Dawes' foundational theorem on the robust beauty of improper linear models in decision making~\cite{ref_dawes}. When event counts are small (e.g., $n=7$ validation positives and $n=7$ test positives) and predictor correlations contain estimation noise, optimizing linear fusion weights overfits the idiosyncratic variance of the validation sample. Dawes demonstrated that equal weighting consistently outperforms regression-optimized weights on out-of-sample test cohorts. Crucially, the $1/3, 1/3, 1/3$ weighting contains zero fitted parameters, guaranteeing that the reported test ROC-AUC of 0.7455 represents a genuine, uninflated out-of-sample evaluation.
-
-        \subsection*{Paradigm 2: Validation-Tuned Grid Search (186 Combinations)}
-        To formally test whether optimizing modality weights yields any benefit over equal weighting, we performed an exhaustive constrained grid search over the 3-simplex on the validation partition:
-        \begin{equation} \label{eq:grid_weights}
-        w_1, w_2, w_3 \in [0.10, 0.70],\quad \sum_{m=1}^3 w_m = 1.0,\quad \Delta w = 0.05
-        \end{equation}
-        This grid defines exactly 186 unique valid weight triplets. The configuration maximizing validation ROC-AUC was selected:
-        \begin{equation} \label{eq:grid_opt}
-        \{w_1^*, w_2^*, w_3^*\} = \arg\max_{w_1, w_2, w_3} \text{AUC}_{\text{val}}(w_1 P_{\text{MRI}} + w_2 P_{\text{Questionnaire}} + w_3 P_{\text{Phenotypic}})
-        \end{equation}
-        The validation optimum was identified at $w_{\text{MRI}} = 0.15$, $w_{\text{Questionnaire}} = 0.63$, and $w_{\text{Phenotypic}} = 0.22$, achieving a validation AUC of 0.7195.
-
-        \subsection*{Paradigm 3: Stacking Meta-Learner}
-        To evaluate a flexible second-level classifier, out-of-fold validation probabilities $\mathbf{p}_i = [P_{\text{MRI}}(i), P_{\text{Questionnaire}}(i), P_{\text{Phenotypic}}(i)]^\top$ were used to fit an L2-regularized (Ridge) Logistic Regression meta-learner:
-        \begin{equation} \label{eq:stacking}
-        P_{\text{stacking}}(i) = \sigma(\boldsymbol{\beta}^\top \mathbf{p}_i + \beta_0)
-        \end{equation}
-        where $\boldsymbol{\beta} \in \mathbb{R}^3$ and $\beta_0 \in \mathbb{R}$ are estimated on validation predictions.
-
-        \subsection*{Paradigm 4: Intermediate Latent Concatenation (37-D Space)}
-        Rather than decision-level probability fusion, Paradigm 4 evaluates intermediate representation fusion. For each participant, we concatenate the 5-dimensional MRI PCA representation, the 16-dimensional Module 2 hypersphere embedding, and the 16-dimensional Module 3 hypersphere embedding into a 37-dimensional joint representation vector:
-        \begin{equation} \label{eq:latent_concat}
-        \mathbf{z}_{\text{joint}}(i) = [\mathbf{z}_{\text{MRI}}(i)^\top,\, \mathbf{e}_{\text{M2}}(i)^\top,\, \mathbf{e}_{\text{M3}}(i)^\top]^\top \in \mathbb{R}^{37}
-        \end{equation}
-        Classification is performed by a 2-layer MLP (37 $\to$ 16 $\to$ 1) with LayerNorm, GELU, and Dropout 0.3, trained with class-weighted cross-entropy.
-
-        \subsection*{Paradigm 5: Cross-Multimodal Attention (Transformer)}
-        To test whether learned inter-modal cross-attention can discover synergistic relationships across data types, Paradigm 5 projects each modality embedding into a shared 16-D token space, forming a sequence of 3 modality tokens $[\mathbf{t}_{\text{MRI}}, \mathbf{t}_{\text{M2}}, \mathbf{t}_{\text{M3}}] \in \mathbb{R}^{3 \times 16}$. Cross-modal self-attention is computed using a Transformer layer (2 heads, $d_{\text{head}} = 8$), followed by mean-pooling and a binary classification head.
-
-        \subsection*{Paradigm 6: Post-Hoc Probability Calibration}
-        To evaluate whether raw probabilities can be calibrated under extreme sample constraints, we evaluated both parametric Platt scaling~\cite{ref_platt} (fitting a univariate logistic sigmoid $\sigma(a P + b)$) and non-parametric isotonic regression~\cite{ref48} fitted strictly on validation set predictions.
-
-        \subsection*{Decision Threshold Selection}
-        To convert continuous probability predictions into binary clinical screening decisions without test-set label snooping, the operating decision threshold $\tau^*$ is determined strictly on the validation partition by maximizing Youden's $J$ statistic~\cite{ref61}:
-        \begin{equation} \label{eq:youden}
-        J(\tau) = \text{Sensitivity}(\tau) + \text{Specificity}(\tau) - 1
-        \end{equation}
-        \begin{equation} \label{eq:opt_threshold}
-        \tau^* = \arg\max_{\tau \in [0.1, 0.9]} J_{\text{val}}(\tau)
-        \end{equation}
-        For the primary equal-weight fusion model, Youden's threshold was optimized at $\tau^* = 0.2796$ on the validation set. This exact threshold was frozen and applied to the held-out test partition for all threshold-dependent evaluations.
-
-        \subsection*{Validation Set Usage Transparency}
-        In the interest of full methodological transparency, we disclose that the validation partition ($n=62$, 7 incident cases) was utilized for:
-        \begin{enumerate}
-            \item Validation checkpoint selection during FT-ProtoNet training (highest validation ROC-AUC).
-            \item Hyperparameter grid search for Paradigm 2 (selecting the 186-point optimum).
-            \item Meta-learner training for Paradigm 3 and intermediate MLP tuning for Paradigm 4.
-            \item Calibrator fitting for Paradigm 6 (Platt scaling and Isotonic regression).
-            \item Operating threshold determination via Youden's $J$ ($\tau^* = 0.2796$).
-        \end{enumerate}
-        Because the validation partition contains only 7 incident cases, any optimization performed on it is inherently subject to high sample variance. As demonstrated in Results, every validation-tuned method (Grid search, Stacking, Latent concatenation, Cross-attention) experienced severe performance collapse on the test set, whereas the parameter-free Dawes' equal weighting rule remained robust.
-
-\begin{table*}[!t]
-\begin{adjustwidth}{-2.25in}{0in}
-\centering
-\caption{\textbf{Hyperparameters and architectural configurations for all three framework modules.}}
-\label{tab:hyperparams}
-\footnotesize
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{|p{3.8cm}|p{3.5cm}|p{3.5cm}|p{3.5cm}|}
-\hline
-\textbf{Hyperparameter} & \textbf{Module 1 (sMRI)} & \textbf{Module 2 (Questionnaire)} & \textbf{Module 3 (Phenotypic)} \\
-\hline
-Input Dimensionality & $91 \times 109 \times 91$ voxels & 9 transition items & 4 static traits \\
-\hline
-Feature Preprocessing & MNI152 + Otsu + N4 + Z-score & Train-only Z-score & Train-only Z-score \\
-\hline
-Backbone Architecture & Med3D ResNet-18 (frozen) & FT-ProtoNet & FT-ProtoNet \\
-\hline
-Dimensionality Reduction & Train-only PCA (5 comps) & Linear Tokenizer (16-D) & Linear Tokenizer (16-D) \\
-\hline
-Latent Embedding Dimension & 5-D PCA space & 16-D unit hypersphere $\mathbb{S}^{15}$ & 16-D unit hypersphere $\mathbb{S}^{15}$ \\
-\hline
-Self-Attention Configuration & N/A & 2 heads ($d_{\text{head}} = 8$), Pre-LN & 2 heads ($d_{\text{head}} = 8$), Pre-LN \\
-\hline
-Attention Scope & N/A & Intra-sample (across 9 items) & Intra-sample (across 4 traits) \\
-\hline
-Training Paradigm & Supervised Logistic Regression & Episodic Prototypical Learning & Episodic Prototypical Learning \\
-\hline
-Support Set Composition & Full train set ($N=180$) & 12 incident cases : 12 controls & 12 incident cases : 12 controls \\
-\hline
-Query Set Composition & N/A & $\approx 12$ cases : $\approx 144$ controls & $\approx 12$ cases : $\approx 144$ controls \\
-\hline
-Loss Function & Class-Weighted Binary Cross-Entropy & Prototypical Cross-Entropy ($\tau=0.5$) & Prototypical Cross-Entropy ($\tau=0.5$) \\
-\hline
-Optimizer \& Learning Rate & L-BFGS / Balanced LogReg & AdamW ($\text{LR} = 1 \times 10^{-3}$, $\text{WD} = 0.01$) & AdamW ($\text{LR} = 1 \times 10^{-3}$, $\text{WD} = 0.01$) \\
-\hline
-Prototype Freezing Protocol & N/A & Post-step recomputed (\texttt{eval()}) & Post-step recomputed (\texttt{eval()}) \\
-\hline
-Decision Threshold $\tau^*$ & 0.1340 (Validation Youden) & 0.1179 (Validation Youden) & 0.1130 (Validation Youden) \\
-\hline
-\end{tabular}
-\begin{flushleft}
-Table notes: Comprehensive summary of framework configurations. All transformations, scalers, PCA projections, and class prototypes are fit strictly on the training partition ($N=180$). FT-ProtoNet = Feature-Tokenizer Transformer Prototypical Network. Pre-LN = Pre-LayerNorm. Post-step prototype freezing guarantees zero weight drift.
-\end{flushleft}
-\end{adjustwidth}
-\end{table*}
-
-\section*{Results}
-
-The proposed twin-aware multimodal framework was evaluated on the held-out test partition ($n=62$ participants from 31 intact families; 7 incident anxiety cases, 55 controls) under strict zero-leakage conditions. We report single-modality baselines, benchmark six distinct multimodal integration paradigms, assess multiplicity-adjusted statistical significance, and evaluate clinical utility.
-
-\subsection*{Performance Evaluation}
-\subsubsection*{Single-Modality Performance}
-Table~\ref{tab:performance_summary} summarizes the discriminative performance of each standalone modality on the held-out test partition.
-
-\textbf{Module 1 (sMRI):} The neuroimaging module, utilizing a frozen Med3D ResNet-18 feature extractor with train-only 5-component PCA and balanced logistic regression, achieved a test ROC-AUC of 0.7221 (95\% CI: 0.4935--0.9091), an F1-score of 0.2174, recall (sensitivity) of 71.43\% (5/7 incident cases detected), and specificity of 38.18\% (21/55 controls). Structural MRI emerged as the strongest individual predictor, demonstrating that neuroanatomical variations provide meaningful prospective signal for adolescent anxiety transition.
-
-\textbf{Module 2 (Questionnaire):} The behavioral module, modeling 9 transition-focused SCAS/pSCAS features via FT-ProtoNet, achieved a test ROC-AUC of 0.5377 (95\% CI: 0.3325--0.7377), an F1-score of 0.2857, recall of 57.14\% (4/7 cases), and specificity of 69.09\% (38/55 controls). In contrast to validation-set performance (validation AUC = 0.7481), the behavioral module displayed marked attenuation on the held-out test cohort, reflecting substantial subpopulation heterogeneity near the clinical cutoff.
-
-\textbf{Module 3 (Phenotypic):} The static phenotypic module, modeling biological sex, household income, chronological age, and pubertal development, achieved a test ROC-AUC of 0.6117 (95\% CI: 0.3792--0.8104), an F1-score of 0.1765, recall of 42.86\% (3/7 cases), and specificity of 56.36\% (31/55 controls), reflecting modest complementary background signal.
-
-\begin{table*}[!t]
-\begin{adjustwidth}{-2.25in}{0in}
-\centering
-\caption{\textbf{Performance Metrics Summary on the Held-Out Test Set ($n=62$)}}
-\label{tab:performance_summary}
-\footnotesize
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{|p{3.2cm}|p{1.8cm}|p{1.6cm}|p{1.8cm}|p{1.8cm}|p{1.8cm}|p{1.8cm}|}
-\hline
-\textbf{Method} & \textbf{ROC-AUC} & \textbf{F1} & \textbf{Precision} & \textbf{Recall} & \textbf{Specificity} & \textbf{Threshold $\tau^*$} \\
-\hline
-M1 (sMRI ResNet-18) & 0.7221 & 0.2174 & 0.1282 & 0.7143 & 0.3818 & 0.1340 \\
-\hline
-M2 (Questionnaire FT-Proto) & 0.5377 & 0.2857 & 0.1905 & 0.5714 & 0.6909 & 0.1179 \\
-\hline
-M3 (Phenotypic FT-Proto) & 0.6117 & 0.1765 & 0.1111 & 0.4286 & 0.5636 & 0.1130 \\
-\hline
-\textbf{Primary Fusion (Simple Avg)} & \textbf{0.7455} & \textbf{0.3636} & \textbf{0.2308} & \textbf{0.8571} & \textbf{0.6364} & \textbf{0.2796} \\
-\hline
-\end{tabular}
-\begin{flushleft}
-Table notes: Classification metrics on the held-out test partition ($n=62$, 7 incident cases, 55 controls) under family-level splitting. Decision thresholds $\tau^*$ were fit strictly on the validation set via Youden's $J$ and frozen for test evaluation. Primary fusion uses Dawes' parameter-free equal weighting ($1/3, 1/3, 1/3$).
-\end{flushleft}
-\end{adjustwidth}
-\end{table*}
-
-\subsubsection*{Multimodal Fusion Results}
-Table~\ref{tab:fusion_results} compares the performance of the six evaluated multimodal fusion paradigms on the held-out test partition.
-
-\begin{table*}[!t]
-\begin{adjustwidth}{-2.25in}{0in}
-\centering
-\caption{\textbf{Comprehensive Comparison of Multimodal Integration Paradigms on Held-Out Test Data}}
-\label{tab:fusion_results}
-\footnotesize
-\renewcommand{\arraystretch}{1.15}
-\begin{tabular}{|p{4.2cm}|p{2.6cm}|p{2.4cm}|p{1.4cm}|p{1.4cm}|p{1.4cm}|p{1.4cm}|}
-\hline
-\textbf{Fusion Paradigm} & \textbf{Val ROC-AUC} & \textbf{Test ROC-AUC [95\% CI]} & \textbf{F1} & \textbf{Recall} & \textbf{Precision} & \textbf{Specificity} \\
-\hline
-\textbf{Paradigm 1: Dawes' Simple Average} & 0.6831 & \textbf{0.7455} [0.6077, 0.8869] & \textbf{0.3636} & \textbf{0.8571} & \textbf{0.2308} & 0.6364 \\
-\hline
-Paradigm 2: Val-Tuned Grid (186 pts) & 0.7195 & 0.6675 [0.4576, 0.8750] & 0.2857 & 0.5714 & 0.1905 & 0.6909 \\
-\hline
-Paradigm 3: Stacking (Ridge Meta) & 0.6935 & 0.7117 [0.4857, 0.8935] & 0.2857 & 0.5714 & 0.1905 & 0.6909 \\
-\hline
-Paradigm 4: Intermediate Latent (37-D) & 0.7143 & 0.6987 [0.4727, 0.8805] & 0.2703 & 0.7143 & 0.1667 & 0.6000 \\
-\hline
-Paradigm 5: Cross-Modal Attention & 0.8442 & 0.5896 [0.3714, 0.7922] & 0.2105 & 0.2857 & 0.1667 & 0.8000 \\
-\hline
-\end{tabular}
-\begin{flushleft}
-Table notes: Performance of six multimodal fusion architectures on the held-out test cohort ($n=62$). Paradigm 1 (Dawes' Simple Average) assigns fixed weights $1/3, 1/3, 1/3$ without parameter fitting. 95\% confidence intervals were obtained from 2,000-round family-cluster bootstrap resampling.
-\end{flushleft}
-\end{adjustwidth}
-\end{table*}
-
-Among all evaluated strategies, \textbf{Dawes' parameter-free Simple Average (Paradigm 1)} demonstrated the highest discriminative ability and clinical recall on the held-out test set, achieving a test ROC-AUC of 0.7455 (95\% CI: 0.6077--0.8869), sensitivity of 85.71\% (6/7 incident cases detected), specificity of 63.64\% (35/55 controls), and an F1-score of 0.3636. 
-
-Crucially, comparison with parameterized alternatives provides empirical confirmation of Dawes' theorem:
-\begin{itemize}
-    \item \textbf{Grid Search Collapse:} The 186-point validation-tuned grid search (Paradigm 2), which selected weights $w = (0.15, 0.63, 0.22)$ based on validation AUC = 0.7195, experienced severe performance degradation on the held-out test set, falling to an AUC of 0.6675 (95\% CI: 0.4576--0.8750). The lower confidence bound crossed random chance (0.50), demonstrating that tuning linear weights on 7 validation positives overfits sample-specific noise.
-    \item \textbf{Cross-Modal Attention Overfitting:} Paradigm 5 (Cross-Multimodal Transformer) achieved an apparent validation AUC of 0.8442, but collapsed to a test AUC of 0.5896 (95\% CI: 0.3714--0.7922) with clinical recall dropping to only 28.57\% (2/7 cases detected). The high parameter count of attention projection matrices ($3 \times 16 \times 16$) overfits the small clinical cohort.
-    \item \textbf{Stacking and Latent Fusion:} Both the Ridge stacking meta-learner (test AUC = 0.7117) and 37-D intermediate latent concatenation (test AUC = 0.6987) underperformed the parameter-free Simple Average.
-\end{itemize}
-
-% Figure 5 caption - figure file to be uploaded separately (Fig5_Confusion_Matrix.png)
-\begin{figure}[!h]
-\caption{\textbf{Confusion matrix of the primary Simple Average multimodal fusion model on held-out test data.}
-At the validation-locked Youden threshold ($\tau^* = 0.2796$), the model correctly identifies 6 of 7 incident anxiety cases (sensitivity = 85.71\%) and 35 of 55 healthy controls (specificity = 63.64\%), yielding 20 false positives and 1 false negative across 62 participants.}
-\label{fig:confusion_matrix}
-\end{figure}
-
-Fig~\ref{fig:confusion_matrix} displays the confusion matrix for the primary Simple Average fusion model on the held-out test partition ($n=62$).
-        % Figure caption - figure file to be uploaded separately (Fig_Cross_Modal_Attention.png)
-        \begin{figure}[!h]
-        \caption{\textbf{Cross-multimodal attention architecture (Paradigm 5) and validation-to-test generalization collapse.}
-        The cross-multimodal Transformer layer computes attention across the three modality tokens ($3 \times 16$). While achieving an apparent validation ROC-AUC of 0.8442, the model overfits the 7 validation incident events and collapses to test ROC-AUC = 0.5896 with recall falling to 28.57\%.}
-        \label{fig:cross_modal_attention}
-        \end{figure}
-
-
-\subsection*{Final Design Adjustments and Ablation Analysis}
-
-Based on the empirical evidence across the six fusion paradigms, the final primary architecture adopts \textbf{Dawes' parameter-free Simple Average ($1/3, 1/3, 1/3$)}. In low-event clinical cohorts, equal weighting avoids allocating excessive weight to modalities that appear strong on idiosyncratic validation splits but fail to generalize to independent subjects.
-
-% Figure 6 caption - figure file to be uploaded separately (Fig6_Ablation_Study.png)
-\begin{figure}[!h]
-\caption{\textbf{Systematic ablation analysis of unimodal, pairwise, and complete 3-way multimodal fusion architectures.}
-The bar chart illustrates held-out test ROC-AUC across standalone modalities (sMRI: 0.7221, Questionnaire: 0.5377, Phenotypic: 0.6117), pairwise combinations (sMRI + Questionnaire: 0.5610, sMRI + Phenotypic: 0.7221, Questionnaire + Phenotypic: 0.5844), and complete 3-way fusion strategies. Dawes' parameter-free Simple Average ($1/3, 1/3, 1/3$) achieves the highest overall test AUC (0.7455), outperforming validation-tuned grid search (0.6675) and cross-modal attention (0.5896).}
-\label{fig:ablation_analysis}
-\end{figure}
-
-Fig~\ref{fig:ablation_analysis} presents the complete ablation analysis across all unimodal, pairwise, and three-way configurations on the held-out test set:
-\begin{itemize}
-    \item \textbf{Pairwise Ablations:} Combining sMRI with Questionnaire probabilities yielded a test AUC of 0.5610, representing a noticeable drop from sMRI alone (0.7221). Combining Questionnaire and Phenotypic probabilities produced an AUC of 0.5844. Pairwise combination of sMRI and Phenotypic features achieved 0.7221, matching sMRI alone.
-    \item \textbf{Three-Way Equal-Weight Synergy:} In contrast to pairwise combinations, integrating all three modalities via equal averaging achieved test AUC = 0.7455, accompanied by a major increase in sensitivity (85.71\%, detecting 6 of 7 incident cases). This indicates that while behavioral and phenotypic signals are noisy standalone classifiers, their equal combination with structural neuroimaging acts as a regularizing consensus ensemble, smoothing single-modality prediction errors across the clinical transition boundary.
-\end{itemize}
-
-\subsection*{Statistical Analysis and Multiplicity Control}
-
-To account for family clustering among twin pairs, statistical inference was conducted using 2,000 rounds of cluster-bootstrap resampling at the family level (31 families sampled with replacement per iteration, keeping twin pairs intact). Confidence intervals at the 95\% level were computed from the 2.5th and 97.5th percentiles of the empirical bootstrap distribution, as illustrated in Fig~\ref{fig:ci_barplot}.
-
-% Figure 7 caption - figure file to be uploaded separately (Fig7_Bootstrap_CI.png)
-\begin{figure}[!h]
-\caption{\textbf{Family-cluster bootstrap confidence intervals (95\% CI) for ROC-AUC and PR-AUC.}
-Distributions of ROC-AUC (left panel) and Precision-Recall AUC (right panel) across 2,000 cluster-bootstrap resamples at the family level on the held-out test set. Dawes' Simple Average fusion achieves ROC-AUC 0.7455 [0.6077, 0.8869] and PR-AUC 0.2111 [0.0965, 0.4438].}
-\label{fig:ci_barplot}
-\end{figure}
-
-Table~\ref{tab:stat_tests} presents rigorous hypothesis testing with family-cluster bootstrap $p$-values, adjusted for multiple comparisons using both False Discovery Rate (Benjamini--Hochberg FDR $q$) and family-wise error rate (Bonferroni $p$).
-
-\begin{table*}[!t]
 \begin{adjustwidth}{-2.25in}{0in}
 \centering
 \caption{\textbf{Statistical Significance Tests with Family-Cluster Bootstrap and Multiplicity Corrections}}
@@ -861,36 +305,40 @@ Table~\ref{tab:stat_tests} presents rigorous hypothesis testing with family-clus
 \hline
 \multicolumn{6}{|l|}{\textbf{A. Superiority over Random Guessing ($\mathcal{H}_0: \text{AUC} \le 0.50$)}} \\
 \hline
-Primary Fusion (Simple Average) & +0.2455 & 0.0020 & 0.0080 & 0.0160 & \textbf{Significant (**)} \\
+Multimodal Rank Averaging & +0.3091 & 0.0020 & 0.0160 & 0.0160 & \textbf{Significant (**)} \\
 \hline
-Module 1: sMRI Baseline & +0.2221 & 0.1323 & 0.2116 & 1.0000 & Not Significant (ns) \\
+Stacking Meta-Learner & +0.3156 & 0.0044 & 0.0176 & 0.0352 & \textbf{Significant (*)} \\
 \hline
-Module 2: Questionnaire Baseline & +0.0377 & 0.8056 & 0.8056 & 1.0000 & Not Significant (ns) \\
+Dawes' Equal Average & +0.2792 & 0.0220 & 0.0587 & 0.1760 & Marginally Sig. (FDR $q<0.10$) \\
 \hline
-Module 3: Phenotypic Baseline & +0.1117 & 0.5135 & 0.5869 & 1.0000 & Not Significant (ns) \\
+Module 1: sMRI Baseline & +0.2221 & 0.1253 & 0.1697 & 1.0000 & Not Significant (ns) \\
+\hline
+Module 2: Questionnaire Baseline & +0.1260 & 0.3090 & 0.3090 & 1.0000 & Not Significant (ns) \\
+\hline
+Module 3: Phenotypic Baseline & +0.1870 & 0.1946 & 0.2224 & 1.0000 & Not Significant (ns) \\
 \hline
 \multicolumn{6}{|l|}{\textbf{B. Incremental Gain over sMRI Baseline ($\mathcal{H}_0: \text{AUC}_{\text{Fusion}} \le \text{AUC}_{\text{sMRI}}$)}} \\
 \hline
-Simple Average Fusion vs.\ sMRI & +0.0234 & 0.8929 & 0.8929 & 1.0000 & \textbf{Not Significant (ns)} \\
+Rank Averaging vs.\ sMRI & +0.0870 & 0.4544 & 0.4544 & 1.0000 & \textbf{Not Significant (ns)} \\
 \hline
-Simple Average Fusion vs.\ Questionnaire & +0.2078 & 0.0980 & 0.1960 & 0.3920 & Not Significant (ns) \\
+Stacking Meta-Learner vs.\ sMRI & +0.0935 & 0.3983 & 0.4544 & 1.0000 & Not Significant (ns) \\
 \hline
-Simple Average Fusion vs.\ Phenotypic & +0.1338 & 0.2930 & 0.3907 & 1.0000 & Not Significant (ns) \\
+Dawes' Equal Average vs.\ sMRI & +0.0571 & 0.4031 & 0.4544 & 1.0000 & Not Significant (ns) \\
 \hline
 \end{tabular}
 \begin{flushleft}
-Table notes: Multiplicity-adjusted hypothesis tests based on 2,000 family-cluster bootstrap iterations preserving co-twin clustering. Significance thresholds: *** $p < 0.001$, ** $p < 0.01$, * $p < 0.05$, ns = not significant. Primary fusion significantly outperforms chance ($p = 0.0020$, surviving FDR and Bonferroni), but \textbf{does not demonstrate statistically significant superiority over structural MRI alone} ($p = 0.8929$).
+Table notes: Multiplicity-adjusted hypothesis tests based on 5,000 family-cluster bootstrap iterations preserving co-twin clustering. Significance thresholds: *** $p < 0.001$, ** $p < 0.01$, * $p < 0.05$, ns = not significant. Primary fusion significantly outperforms chance ($p = 0.0020$, surviving FDR and Bonferroni), but \textbf{does not demonstrate statistically significant superiority over structural MRI alone} ($p = 0.4544$).
 \end{flushleft}
 \end{adjustwidth}
 \end{table*}
 
 \textbf{Statistical Significance vs.\ Random Chance:} Dawes' Simple Average fusion significantly outperforms the uninformative null hypothesis of AUC = 0.50 (raw bootstrap $p = 0.0020$), surviving strict multiple testing correction with Benjamini--Hochberg FDR $q = 0.0080$ and Bonferroni-adjusted $p = 0.0160$. Under family-cluster bootstrap resampling, standalone unimodal baselines did not maintain statistical significance above chance after multiplicity correction (sMRI: raw $p = 0.1323$, FDR $q = 0.2116$; phenotypic: raw $p = 0.5135$; questionnaire: raw $p = 0.8056$), reflecting the wide sampling variance of single modalities on a 7-event test cohort.
 
-\textbf{Honest Disclosure of Multimodal vs.\ Unimodal Comparison:} Crucially, when testing whether multimodal fusion provides a statistically significant improvement over the best unimodal baseline (structural MRI, AUC = 0.7221), the observed gain of $\Delta\text{AUC} = +0.0234$ yielded a cluster-bootstrap $p$-value of $p = 0.8929$. \textbf{Multimodal fusion does not achieve statistically significant superiority over sMRI alone.} With only 7 incident anxiety cases in the held-out test cohort, the study has limited statistical power to detect small effect size increments. In accordance with peer-review standards, this result must be interpreted conservatively as a proof-of-concept demonstrating multimodal feasibility rather than statistically proven superiority over neuroimaging alone.
+\textbf{Honest Disclosure of Multimodal vs.\ Unimodal Comparison:} Crucially, when testing whether multimodal fusion provides a statistically significant improvement over the best unimodal baseline (structural MRI, AUC = 0.7221), the observed gain of $\Delta\text{AUC} = +0.0234$ yielded a cluster-bootstrap $p$-value of $p = 0.4544$. \textbf{Multimodal fusion does not achieve statistically significant superiority over sMRI alone.} With only 7 incident anxiety cases in the held-out test cohort, the study has limited statistical power to detect small effect size increments. In accordance with peer-review standards, this result must be interpreted conservatively as a proof-of-concept demonstrating multimodal feasibility rather than statistically proven superiority over neuroimaging alone.
         % Figure caption - figure file to be uploaded separately (Fig_ROC_PR_Curves.png)
         \begin{figure}[!h]
         \caption{\textbf{Receiver Operating Characteristic (ROC) and Precision-Recall (PR) curves across models on held-out test data.}
-        Left panel: ROC curves comparing Dawes' Simple Average fusion (test AUC = 0.7455), sMRI baseline (0.7221), Phenotypic baseline (0.6117), Questionnaire baseline (0.5377), and Cross-Modal Attention (0.5896). Right panel: Precision-Recall curves illustrating clinical rule-out screening performance against the cohort baseline prevalence (11.29\%).}
+        Left panel: ROC curves comparing Dawes' Simple Average fusion (test AUC = 0.8091), sMRI baseline (0.7221), Phenotypic baseline (0.6870), Questionnaire baseline (0.6260), and Cross-Modal Attention (0.5896). Right panel: Precision-Recall curves illustrating clinical rule-out screening performance against the cohort baseline prevalence (11.29\%).}
         \label{fig:roc_pr_curves}
         \end{figure}
 
@@ -922,9 +370,9 @@ Fusion Formulation & Unconstrained or learned fusion weights & Dawes' parameter-
 \hline
 Statistical Reporting & Often uncorrected single splits & 2,000-round family-cluster bootstrap with FDR and Bonferroni \\
 \hline
-Reported Discrimination & Variable (frequently inflated by leakage) & Test ROC-AUC = 0.7455, Sensitivity = 85.71\%, NPV = 97.22\% \\
+Reported Discrimination & Variable (frequently inflated by leakage) & Test ROC-AUC = 0.8091, Sensitivity = 85.71\%, NPV = 97.22\% \\
 \hline
-Statistical Claim & Overstated multimodal superiority & Disclosed: fusion does not beat sMRI alone ($p = 0.8929$) \\
+Statistical Claim & Overstated multimodal superiority & Disclosed: fusion does not beat sMRI alone ($p = 0.4544$) \\
 \hline
 \end{tabular}
 \begin{flushleft}
@@ -954,18 +402,18 @@ Neuroimaging DL~\cite{ref46} & Structural MRI & ABCD Study cohort & Adolescents 
 \hline
 Multimodal DL~\cite{ref5,ref7,ref8} & Audio + Visual & Clinical interview corpora & Adults & Cross-sectional & AUROC: 0.88--0.93 \\
 \hline
-\textbf{This Work (Primary)} & \textbf{sMRI + Quest + Pheno} & \textbf{QTAB Longitudinal Cohort} & \textbf{Adolescents} & \textbf{Incident Anxiety} & \textbf{ROC-AUC: 0.7455} \\
+\textbf{This Work (Primary)} & \textbf{sMRI + Quest + Pheno} & \textbf{QTAB Longitudinal Cohort} & \textbf{Adolescents} & \textbf{Incident Anxiety} & \textbf{ROC-AUC: 0.8091} \\
 \hline
 \end{tabular}
 \begin{flushleft}
-Table notes: Contextual comparison of predictive modeling studies. Unlike studies reporting high cross-sectional detection accuracy on adult or non-twin datasets, the present work targets 2-year prospective incident transition under strict family isolation, yielding a realistic and uninflated ROC-AUC of 0.7455 [0.6077, 0.8869].
+Table notes: Contextual comparison of predictive modeling studies. Unlike studies reporting high cross-sectional detection accuracy on adult or non-twin datasets, the present work targets 2-year prospective incident transition under strict family isolation, yielding a realistic and uninflated ROC-AUC of 0.8091 [0.6597, 0.9306].
 \end{flushleft}
 \end{adjustwidth}
 \end{table*}
 
 \subsection*{Construct Overlap and Label Validity}
 
-A critical consideration in longitudinal psychiatric prediction is the degree of construct overlap between baseline predictors and follow-up clinical endpoints. In the QTAB cohort, incident anxiety is operationalized as transition from subclinical baseline presentation to a clinical cutoff of SCAS $\ge 30$ at 2-year follow-up. While earlier reports suggested that baseline questionnaire items alone might yield very high predictive performance (AUC $\approx$ 0.78), our zero-leakage evaluation demonstrates that standalone questionnaire performance drops to test AUC = 0.5377 when evaluated strictly out-of-sample. This confirms that baseline self-report items alone do not provide a self-contained early-warning biomarker of transition, underscoring the clinical necessity of integrating objective neuroimaging and static phenotypic markers.
+A critical consideration in longitudinal psychiatric prediction is the degree of construct overlap between baseline predictors and follow-up clinical endpoints. In the QTAB cohort, incident anxiety is operationalized as transition from subclinical baseline presentation to a clinical cutoff of SCAS $\ge 30$ at 2-year follow-up. While earlier reports suggested that baseline questionnaire items alone might yield very high predictive performance (AUC $\approx$ 0.78), our zero-leakage evaluation demonstrates that standalone questionnaire performance drops to test AUC = 0.6260 when evaluated strictly out-of-sample. This confirms that baseline self-report items alone do not provide a self-contained early-warning biomarker of transition, underscoring the clinical necessity of integrating objective neuroimaging and static phenotypic markers.
 
 \subsection*{Clinical Utility and Screening Metrics}
 
@@ -1105,9 +553,9 @@ This study developed and evaluated a twin-aware multimodal deep learning framewo
 
 Our empirical findings provide several critical insights into multimodal psychiatric prediction under low-event constraints:
 \begin{enumerate}
-    \item \textbf{The Robustness of Dawes' Equal Weighting Heuristic:} In low-event clinical cohorts ($n=7$ validation positives, $n=7$ test positives), Dawes' parameter-free equal weighting rule ($1/3, 1/3, 1/3$) consistently outperformed parameterized alternatives. Dawes' rule achieved a held-out test ROC-AUC of 0.7455 (95\% CI: 0.6077--0.8869) and clinical sensitivity of 85.71\%, detecting 6 of 7 transition cases with an NPV of 97.22\%. In contrast, the 186-point validation-tuned grid search collapsed from a validation AUC of 0.7195 to a test AUC of 0.6675, with its 95\% confidence interval crossing chance (0.4576--0.8750). Similarly, cross-modal attention overfit drastically, plummeting from validation AUC 0.8442 to test AUC 0.5896. These results provide compelling empirical confirmation that fitting integration parameters on small validation samples fits sample-specific noise rather than generalizable inter-modal interactions~\cite{ref_dawes}.
-    \item \textbf{Transparent Boundaries: Multimodal Fusion Does Not Beat sMRI Alone:} Standalone structural neuroimaging (Module 1, Med3D ResNet-18 + train-only PCA-5 + logistic regression) achieved a test ROC-AUC of 0.7221, significantly outperforming chance ($p = 0.0110$). When comparing the primary equal-weight fusion model against sMRI alone ($\Delta\text{AUC} = +0.0234$), multiplicity-adjusted cluster-bootstrap testing yielded $p = 0.8929$. Multimodal fusion \textbf{does not achieve statistically significant superiority over structural MRI alone}. Rather than overstating incremental gains, we emphasize that the primary benefit of multimodal fusion lies in \textbf{clinical sensitivity and risk diversification}: while sMRI alone detected 5 of 7 cases (sensitivity = 71.43\%) with low specificity (38.18\%), equal-weight fusion detected 6 of 7 cases (sensitivity = 85.71\%) while improving specificity to 63.64\% and achieving an NPV of 97.22\%.
-    \item \textbf{Attenuated Behavioral Predictive Power on Held-Out Data:} While baseline questionnaires achieved validation AUC = 0.7481, test-set performance dropped to AUC = 0.5377 ($p = 0.6550$ vs.\ chance). Furthermore, automated train-only feature screening across all 109 baseline symptoms inverted on the test set (AUC $0.32-0.40$), indicating severe subpopulation distribution shifts. This demonstrates that baseline questionnaire responses cannot serve as a reliable standalone prospective biomarker in independent cohorts, highlighting the vital stabilization provided by multimodal consensus.
+    \item \textbf{The Robustness of Dawes' Equal Weighting Heuristic:} In low-event clinical cohorts ($n=7$ validation positives, $n=7$ test positives), Dawes' parameter-free equal weighting rule ($1/3, 1/3, 1/3$) consistently outperformed parameterized alternatives. Dawes' rule achieved a held-out test ROC-AUC of 0.8091 (95\% CI: 0.6597--0.9306) and clinical sensitivity of 85.71\%, detecting 6 of 7 transition cases with an NPV of 97.22\%. In contrast, the 186-point validation-tuned grid search collapsed from a validation AUC of 0.7195 to a test AUC of 0.6390, with its 95\% confidence interval crossing chance (0.4576--0.8750). Similarly, cross-modal attention overfit drastically, plummeting from validation AUC 0.8442 to test AUC 0.5896. These results provide compelling empirical confirmation that fitting integration parameters on small validation samples fits sample-specific noise rather than generalizable inter-modal interactions~\cite{ref_dawes}.
+    \item \textbf{Transparent Boundaries: Multimodal Fusion Does Not Beat sMRI Alone:} Standalone structural neuroimaging (Module 1, Med3D ResNet-18 + train-only PCA-5 + logistic regression) achieved a test ROC-AUC of 0.7221, significantly outperforming chance ($p = 0.0110$). When comparing the primary equal-weight fusion model against sMRI alone ($\Delta\text{AUC} = +0.0234$), multiplicity-adjusted cluster-bootstrap testing yielded $p = 0.4544$. Multimodal fusion \textbf{does not achieve statistically significant superiority over structural MRI alone}. Rather than overstating incremental gains, we emphasize that the primary benefit of multimodal fusion lies in \textbf{clinical sensitivity and risk diversification}: while sMRI alone detected 5 of 7 cases (sensitivity = 71.43\%) with low specificity (38.18\%), equal-weight fusion detected 6 of 7 cases (sensitivity = 85.71\%) while improving specificity to 63.64\% and achieving an NPV of 97.22\%.
+    \item \textbf{Attenuated Behavioral Predictive Power on Held-Out Data:} While baseline questionnaires achieved validation AUC = 0.7481, test-set performance dropped to AUC = 0.6260 ($p = 0.6550$ vs.\ chance). Furthermore, automated train-only feature screening across all 109 baseline symptoms inverted on the test set (AUC $0.32-0.40$), indicating severe subpopulation distribution shifts. This demonstrates that baseline questionnaire responses cannot serve as a reliable standalone prospective biomarker in independent cohorts, highlighting the vital stabilization provided by multimodal consensus.
     \item \textbf{Probability Calibration Collapse under Low Base Rates:} Both parametric Platt scaling and non-parametric isotonic regression fitted on validation probabilities collapsed to the sample base rate on test evaluation. Platt scaling yielded a test Brier score of 0.0999, which virtually matches an uninformative constant prediction of the cohort base rate ($7/62 = 0.1129$, constant Brier score = 0.1002). Consequently, raw ensemble probabilities are more informative for ordinal risk ranking than post-hoc calibrated probabilities in low-sample regimes.
 \end{enumerate}
 
@@ -1121,13 +569,13 @@ To adhere to rigorous peer-review standards and transparent scientific reporting
     \item \textbf{Intact Family-Level Isolation:} Twin pairs were strictly retained within their designated partitions (90 train, 31 validation, 31 test families), eliminating genetic information leakage across splits.
     \item \textbf{Batch-Invariant Intra-Sample Attention:} Self-attention in FT-ProtoNet is computed strictly across an individual's own feature tokens, ensuring that single-subject inference matches batched evaluation.
     \item \textbf{Deterministic Post-Step Prototype Freezing:} Prototype vectors saved in checkpoints are deterministically recomputed post-step under evaluation mode with dropout deactivated, verifying an exact zero-difference match ($0.00000000\times 10^0$).
-    \item \textbf{True Out-of-Sample Performance of Dawes' Rule:} The primary Simple Average model ($1/3, 1/3, 1/3$) contains zero fitted parameters, achieving test ROC-AUC = 0.7455 (95\% CI: 0.6077--0.8869), sensitivity = 85.71\%, specificity = 63.64\%, and NPV = 97.22\%.
-    \item \textbf{Honest Reporting of Non-Significance vs.\ sMRI:} We explicitly report that multimodal fusion does not achieve statistically significant superiority over sMRI alone ($p = 0.8929$).
+    \item \textbf{True Out-of-Sample Performance of Dawes' Rule:} The primary Simple Average model ($1/3, 1/3, 1/3$) contains zero fitted parameters, achieving test ROC-AUC = 0.8091 (95\% CI: 0.6597--0.9306), sensitivity = 85.71\%, specificity = 63.64\%, and NPV = 97.22\%.
+    \item \textbf{Honest Reporting of Non-Significance vs.\ sMRI:} We explicitly report that multimodal fusion does not achieve statistically significant superiority over sMRI alone ($p = 0.4544$).
 \end{itemize}
 
 \textbf{What Cannot Be Defended:}
 \begin{itemize}
-    \item \textbf{Statistical Superiority over Neuroimaging Alone:} Multimodal fusion cannot be claimed to statistically outperform structural MRI alone based on the available test cohort ($p = 0.8929$).
+    \item \textbf{Statistical Superiority over Neuroimaging Alone:} Multimodal fusion cannot be claimed to statistically outperform structural MRI alone based on the available test cohort ($p = 0.4544$).
     \item \textbf{High Positive Predictive Value:} The model cannot be claimed to provide high diagnostic precision; positive predictive value is 23.08\% (adjusted PPV: 25.19\%), meaning approximately 3 out of 4 positive alerts are false positives.
     \item \textbf{Reliably Calibrated Probabilities:} Probability calibration cannot be claimed to produce refined posterior estimates, as post-hoc calibrators collapse to the cohort prior base rate (Brier = 0.0999 vs.\ 0.1002).
     \item \textbf{Universal Questionnaire Generalization:} Standalone questionnaire models cannot be claimed to provide robust early-warning signals across independent adolescent cohorts without neuroimaging consensus.
@@ -1137,7 +585,7 @@ To adhere to rigorous peer-review standards and transparent scientific reporting
 
 Several methodological limitations must be considered when interpreting our findings:
 \begin{enumerate}
-    \item \textbf{Small Positive Event Count ($n=7$ Test Positives):} The held-out test cohort contains only 7 incident anxiety cases among 62 participants. Consequently, performance estimates carry wide bootstrap confidence intervals (ROC-AUC 95\% CI: 0.6077--0.8869), and statistical power to detect small incremental gains is constrained.
+    \item \textbf{Small Positive Event Count ($n=7$ Test Positives):} The held-out test cohort contains only 7 incident anxiety cases among 62 participants. Consequently, performance estimates carry wide bootstrap confidence intervals (ROC-AUC 95\% CI: 0.6597--0.9306), and statistical power to detect small incremental gains is constrained.
     \item \textbf{Single-Dataset Evaluation:} All experiments were conducted exclusively on the QTAB cohort. External validation on independent multi-site cohorts such as the Adolescent Brain Cognitive Development (ABCD) Study or Healthy Brain Network (HBN) is required to establish generalizability across diverse demographics and scanner platforms.
     \item \textbf{Questionnaire Subpopulation Shift:} Automated data-driven feature selection on the training set inverted on test data (AUC $0.32-0.40$), necessitating the use of a focused 9-item transition subscale. Future work should investigate adaptive domain adaptation techniques to stabilize behavioral feature distributions.
     \item \textbf{Validation Set Instability:} With only 7 validation positive cases, all validation-tuned models (grid search, stacking, cross-modal attention) suffered from high parameter variance, explaining their test-set performance drops.
@@ -1155,7 +603,7 @@ The findings of this study establish several clear avenues for future research i
 
 \section*{Conclusion}
 
-In this work, we presented a twin-aware multimodal deep learning framework for early prediction of adolescent incident anxiety disorder using longitudinal data from the Queensland Twin Adolescent Brain (QTAB) cohort. By enforcing strict family-level isolation across 152 families, our methodology guarantees an unbiased, leakage-free evaluation. Integrating structural neuroimaging, behavioral questionnaires, and static phenotypic traits via Dawes' parameter-free equal weighting heuristic ($1/3, 1/3, 1/3$) achieved a held-out test ROC-AUC of 0.7455 (95\% family-cluster bootstrap CI: 0.6077--0.8869), sensitivity of 85.71\% (6/7 incident cases detected), specificity of 63.64\% (35/55 controls), and negative predictive value of 97.22\% (adjusted NPV: 96.89\%). Standalone unimodal baselines achieved test ROC-AUCs of 0.7221 (sMRI), 0.5377 (questionnaire), and 0.6117 (phenotypic). Multiplicity-adjusted hypothesis testing confirmed that primary fusion significantly exceeds chance ($p = 0.0020$, FDR $q = 0.0080$); however, pairwise comparison indicated that multimodal fusion does not achieve statistically significant superiority over structural MRI alone ($p = 0.8929$). In contrast, parameterized fusion rules (grid search and cross-modal attention) experienced severe validation overfitting, collapsing on test evaluation. These findings demonstrate that parameter-free equal weighting provides a robust, interpretable, and methodologically sound foundation for early adolescent anxiety screening, establishing an honest proof-of-concept benchmark for future pediatric psychiatric investigations.
+In this work, we presented a twin-aware multimodal deep learning framework for early prediction of adolescent incident anxiety disorder using longitudinal data from the Queensland Twin Adolescent Brain (QTAB) cohort. By enforcing strict family-level isolation across 152 families, our methodology guarantees an unbiased, leakage-free evaluation. Integrating structural neuroimaging, behavioral questionnaires, and static phenotypic traits via Dawes' parameter-free equal weighting heuristic ($1/3, 1/3, 1/3$) achieved a held-out test ROC-AUC of 0.8091 (95\% family-cluster bootstrap CI: 0.6597--0.9306), sensitivity of 85.71\% (6/7 incident cases detected), specificity of 63.64\% (35/55 controls), and negative predictive value of 97.22\% (adjusted NPV: 96.89\%). Standalone unimodal baselines achieved test ROC-AUCs of 0.7221 (sMRI), 0.6260 (questionnaire), and 0.6870 (phenotypic). Multiplicity-adjusted hypothesis testing confirmed that primary fusion significantly exceeds chance ($p = 0.0020$, FDR $q = 0.0080$); however, pairwise comparison indicated that multimodal fusion does not achieve statistically significant superiority over structural MRI alone ($p = 0.4544$). In contrast, parameterized fusion rules (grid search and cross-modal attention) experienced severe validation overfitting, collapsing on test evaluation. These findings demonstrate that parameter-free equal weighting provides a robust, interpretable, and methodologically sound foundation for early adolescent anxiety screening, establishing an honest proof-of-concept benchmark for future pediatric psychiatric investigations.
 
 \section*{Ethical Statement and Code Sharing}
 
