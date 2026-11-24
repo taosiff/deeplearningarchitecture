@@ -709,9 +709,12 @@ def build_fig4():
             color='#0369A1', fontsize=7.8, fontweight='bold', zorder=25)
 
     # Clean flow from Tokenizer into Transformer at the TOP of Column 3
-    ax.plot([4.55, 4.90], [5.15, 5.15], color='#0284C7', lw=1.8, zorder=15)
-    ax.plot([4.90, 4.90], [5.15, 7.85], color='#0284C7', lw=1.8, zorder=15)
-    draw_arrow(ax, 4.90, 7.85, 7.85, 7.85, color='#0284C7', lw=1.8, badge=r'$\mathbf{T} \in \mathbb{R}^{D \times 16}$', badge_col='#0284C7', zorder=15)
+    ax.plot([4.55, 5.05], [5.15, 5.15], color='#0284C7', lw=1.8, zorder=15)
+    ax.plot([5.05, 5.05], [5.15, 7.65], color='#0284C7', lw=1.8, zorder=15)
+    draw_arrow(ax, 5.05, 7.65, 5.75, 7.65, color='#0284C7', lw=1.8, zorder=15)
+    bbox_tok_exit = dict(boxstyle="round,pad=0.25,rounding_size=0.18", facecolor='#0284C7', edgecolor='none')
+    ax.text(5.05, 7.95, r"$\mathbf{T} \in \mathbb{R}^{D \times 16}$",
+            ha='center', va='center', color='white', fontsize=7.6, fontweight='bold', bbox=bbox_tok_exit, zorder=25)
 
     # -------------------------------------------------------------------------
     # COLUMN 3: INTRA-SAMPLE MULTI-HEAD SELF-ATTENTION TRANSFORMER (Center Panel)
@@ -725,14 +728,17 @@ def build_fig4():
     ax.text(7.85, 8.30, r"$\mathrm{Intra\text{-}Sample\ Multi\text{-}Head\ Attention\ across\ D\ Features}$", ha='center', va='center',
             color='#166534', fontsize=7.8, fontstyle='italic', zorder=25)
     
-    # Branch Point 1 (Solid Dot)
-    draw_branch_dot(ax, 7.85, 7.55, r=0.065, col='#14532D', zorder=25)
+    # Branch Point 1: Input split at entrance of bypass lane (x = 5.75, y = 7.65)
+    draw_branch_dot(ax, 5.75, 7.65, r=0.065, col='#14532D', zorder=25)
+
+    # Main Branch: Extends from Branch Point 1 across to Centerline and drops into LayerNorm 1
+    ax.plot([5.75, 7.85], [7.65, 7.65], color='#16A34A', lw=1.8, zorder=15)
+    draw_arrow(ax, 7.85, 7.65, 7.85, 6.95, color='#16A34A', lw=1.5, zorder=15)
 
     # --- SUB-LAYER 1: PRE-LN MULTI-HEAD ATTENTION ---
     # LayerNorm 1 Pill
     draw_pill(ax, 6.70, 6.95, 2.30, 0.45, text=r"$\tilde{\mathbf{T}} = \mathrm{LayerNorm}(\mathbf{T}) \in \mathbb{R}^{D \times 16}$",
               face_col='#FFFFFF', edge_col='#16A34A', text_col='#166534', font_size=7.4, font_weight='normal')
-    draw_arrow(ax, 7.85, 7.55, 7.85, 6.95, color='#16A34A', lw=1.5, zorder=15)
 
     # Multi-Head Self-Attention Pill
     draw_pill(ax, 6.05, 5.25, 3.60, 1.35,
@@ -745,9 +751,8 @@ def build_fig4():
     # Arrow from MHA into Addition Node 1
     draw_arrow(ax, 7.85, 5.25, 7.85, 4.95, color='#16A34A', lw=1.5, zorder=15)
 
-    # Residual Skip Connection 1 (Branch 1 -> Left -> Down -> Addition Circle 1)
-    ax.plot([7.85, 5.75], [7.55, 7.55], color='#059669', lw=1.8, zorder=20)
-    ax.plot([5.75, 5.75], [7.55, 4.75], color='#059669', lw=1.8, zorder=20)
+    # Residual Skip Connection 1 (from Branch Point 1 down the bypass lane into Addition Circle 1)
+    ax.plot([5.75, 5.75], [7.65, 4.75], color='#059669', lw=1.8, zorder=20)
     ax.annotate('', xy=(7.62, 4.75), xytext=(5.75, 4.75),
                 arrowprops=dict(arrowstyle="-|>", lw=1.8, color='#059669', mutation_scale=12), zorder=20)
     ax.text(5.62, 6.15, r"$\mathrm{Residual\ Skip\ 1}$", ha='center', va='center',
@@ -860,29 +865,32 @@ def build_fig4():
     ax.text(15.25, 6.85, r"$\mathbf{c}_1\ (\mathrm{Class\ 1:\ Incident})$", ha='left', va='center',
             color='#991B1B', fontsize=7.8, fontweight='bold', zorder=25)
 
-    # Prototype Definition Formula Pill
-    draw_pill(ax, 14.55, 5.15, 2.60, 1.30,
-              text="Balanced Support Prototypes:\n\n" +
-                   r"$\mathbf{c}_k = \frac{\sum_{i \in S_k} \mathbf{z}_i}{\|\sum_{i \in S_k} \mathbf{z}_i\|_2} \in \mathbb{S}^{15}$" + "\n" +
-                   r"$(|S_0|=12,\ |S_1|=12)$",
-              face_col='#FFFFFF', edge_col='#9333EA', text_col='#6B21A8', font_size=7.6, font_weight='normal')
+    # Prototype Definition Formula Pill (Disclosing Training vs Evaluation Prototypes)
+    draw_pill(ax, 14.50, 4.85, 2.70, 1.75,
+              text="Training vs Scoring Prototypes:\n\n" +
+                   r"$\bullet\ \mathbf{c}_k^{\mathrm{train}} = \frac{\sum_{S_k} \mathbf{z}_i}{\|\sum \mathbf{z}_i\|}\ (|S_0|=12, |S_1|=12)$" + "\n" +
+                   r"$(\mathrm{Balanced\ Support\ for\ Episodic\ Loss})$" + "\n\n" +
+                   r"$\bullet\ \mathbf{c}_k^{\mathrm{eval}} = \frac{\sum_{\mathrm{Tr}_k} \mathbf{z}_i}{\|\sum \mathbf{z}_i\|}\ (N_0=156, N_1=24)$" + "\n" +
+                   r"$(\mathrm{Full\text{-}Cohort\ Centroids\ for\ Val/Test})$",
+              face_col='#FFFFFF', edge_col='#9333EA', text_col='#6B21A8', font_size=7.1, font_weight='normal')
 
-    draw_arrow(ax, 15.85, 5.15, 15.85, 4.40, color='#9333EA', lw=1.4, zorder=20)
+    draw_arrow(ax, 15.85, 4.85, 15.85, 4.25, color='#9333EA', lw=1.4, zorder=20)
 
-    # Cosine Similarity Logits & Softmax Probability Pill
-    draw_pill(ax, 14.55, 2.40, 2.60, 1.90,
-              text="Cosine Prototype Likelihood:\n\n" +
-                   r"$s_k(\mathbf{z}) = \frac{\mathbf{z}^T \mathbf{c}_k}{\tau} = \frac{\cos(\mathbf{z}, \mathbf{c}_k)}{\tau}$" + "\n\n" +
-                   r"$P(y = 1 \mid \mathbf{x}) = \frac{\exp(s_1)}{\exp(s_0) + \exp(s_1)}$" + "\n" +
+    # Cosine Similarity Logits & Softmax Probability Pill (Scored with Eval Prototypes)
+    draw_pill(ax, 14.50, 2.45, 2.70, 1.80,
+              text=r"Cosine Scoring on Test Query $\mathbf{z}^*$:" + "\n\n" +
+                   r"$s_k(\mathbf{z}^*) = \frac{\mathbf{z}^{*T} \mathbf{c}_k^{\mathrm{eval}}}{\tau} = \frac{\cos(\mathbf{z}^*, \mathbf{c}_k^{\mathrm{eval}})}{\tau}$" + "\n\n" +
+                   r"$P(y = 1 \mid \mathbf{x}^*) = \frac{\exp(s_1)}{\exp(s_0) + \exp(s_1)}$" + "\n" +
                    r"$(\tau \in [0.05, 1.0]\ \mathrm{learnable})$",
-              face_col='#F3E8FF', edge_col='#9333EA', text_col='#581C87', font_size=7.6, font_weight='normal')
+              face_col='#F3E8FF', edge_col='#9333EA', text_col='#581C87', font_size=7.2, font_weight='normal')
 
-    # Episodic Optimization Loss Pill
-    draw_pill(ax, 14.55, 0.95, 2.60, 1.25,
-              text="Episodic Meta-Loss:\n" +
-                   r"$\mathcal{L}_{\mathrm{meta}} = -\frac{1}{|Q|} \sum_{q \in Q} \log P(y_q \mid \mathbf{x}_q)$" + "\n" +
-                   r"(Solves $\sim 1:6.5$ Imbalance)",
-              face_col='#7E22CE', edge_col='#581C87', text_col='#FFFFFF', font_size=7.4, font_weight='bold')
+    # Episodic Optimization Loss Pill (Revealing Query Set Imbalance: 12 cases vs 144 controls = 1:12)
+    draw_pill(ax, 14.50, 0.90, 2.70, 1.35,
+              text="Episodic Training Loss:\n" +
+                   r"$\mathcal{L}_{\mathrm{meta}} = -\frac{1}{|Q|} \sum_{q \in Q} \log P(y_q \mid \mathbf{x}_q; \mathbf{c}_k^{\mathrm{train}})$" + "\n" +
+                   r"Query $Q$: $12\ \mathrm{cases} : 144\ \mathrm{controls}\ (1:12)$" + "\n" +
+                   r"$(\mathrm{Optimized\ on\ 12\text{-}shot;\ Scored\ on\ Full})$",
+              face_col='#7E22CE', edge_col='#581C87', text_col='#FFFFFF', font_size=6.9, font_weight='bold')
 
     draw_arrow(ax, 17.15, 3.35, 17.55, 3.35, color='#0F172A', lw=1.8, zorder=20)
 
