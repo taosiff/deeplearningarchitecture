@@ -35,6 +35,10 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import torch
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
 from sklearn.metrics import (
     roc_auc_score,
     average_precision_score,
@@ -53,6 +57,9 @@ SEED = 42
 def set_seed(seed=SEED):
     random.seed(seed)
     np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
 
 set_seed(SEED)
 
@@ -303,10 +310,229 @@ res_embed = compute_complete_metrics(y_val, p_embed_val, y_test, p_embed_test)
 print(f"Optimal L2 Regularization C: {best_c_embed} | Val AUC: {res_embed['val_auc']:.4f} | Test AUC: {res_embed['test_auc']:.4f} | F1: {res_embed['f1']:.4f}")
 
 # ==============================================================================
-# FUSION PARADIGM 5: CALIBRATION SUITE & BASE-RATE COMPARISON
+# FUSION PARADIGM 5: CROSS-MULTIMODAL ATTENTION (MULTIMODAL TRANSFORMER)
 # ==============================================================================
 print("\n" + "=" * 80)
-print("FUSION PARADIGM 5: CALIBRATION SENSITIVITY SUITE (PLATT VS ISOTONIC VS BASE-RATE)")
+print("FUSION PARADIGM 5: CROSS-MULTIMODAL ATTENTION (MULTIMODAL TRANSFORMER)")
+print("=" * 80)
+
+class CrossMultimodalAttentionFusion(nn.Module):
+    """
+    Intra-Sample Cross-Multimodal Multi-Head Attention Network.
+    
+    Architecture:
+    1. Modality Token Linear Projections: Projects M1 (5-D PCA), M2 (16-D ProtoNet),
+       and M3 (16-D ProtoNet) into a unified d_model representation space.
+    2. Modality Type Embeddings: Learned positional/type embeddings distinguishing
+       neuroimaging, psychometric, and demographic channels.
+    3. Cross-Multimodal Multi-Head Self-Attention (Pre-LN): Computes bidirectional
+       cross-modal interaction across the 3 modality tokens for each participant.
+       Strictly sample-independent (batch pass vs item pass identical; zero cross-subject leakage).
+    4. Feed-Forward Network with GELU activations and residual skip connections.
+    5. Query-Based Attention Pooling across the 3 contextualized modality tokens.
+    6. Classification Risk Head producing calibrated incident probability.
+    """
+    def __init__(self, d_m1=5, d_m2=16, d_m3=16, d_model=16, n_heads=2, dropout=0.10):
+        super().__init__()
+        self.d_model = d_model
+        
+        # Feature projections into shared d_model space
+        self.proj_m1 = nn.Sequential(nn.Linear(d_m1, d_model), nn.LayerNorm(d_model))
+        self.proj_m2 = nn.Sequential(nn.Linear(d_m2, d_model), nn.LayerNorm(d_model))
+        self.proj_m3 = nn.Sequential(nn.Linear(d_m3, d_model), nn.LayerNorm(d_model))
+        
+        # Learnable modality position/type embeddings
+        self.modality_emb = nn.Parameter(torch.randn(3, d_model) * 0.05)
+        
+        # Pre-LN Cross-Modal Attention
+        self.norm1 = nn.LayerNorm(d_model)
+        self.cross_mha = nn.MultiheadAttention(embed_dim=d_model, num_heads=n_heads, dropout=dropout, batch_first=True)
+        
+        # Pre-LN FFN
+        self.norm2 = nn.LayerNorm(d_model)
+        self.ffn = nn.Sequential(
+            nn.Linear(d_model, d_model * 2),
+            nn.GELU(),
+            nn.Dropout(dropout),
+            nn.Linear(d_model * 2, d_model),
+            nn.Dropout(dropout)
+        )
+        
+        # Dynamic query pooling across the 3 contextualized modality tokens
+        self.pool_query = nn.Parameter(torch.randn(1, 1, d_model) * 0.05)
+        
+        # Classification projection
+        self.classifier = nn.Sequential(
+            nn.Linear(d_model, d_model // 2),
+            nn.GELU(),
+            nn.Linear(d_model // 2, 1)
+        )
+
+    def forward(self, z1, z2, z3):
+        B = z1.size(0)
+        
+        # 1. Project modalities to tokens & add modality identity embedding
+        t1 = self.proj_m1(z1).unsqueeze(1) + self.modality_emb[0].view(1, 1, -1)
+        t2 = self.proj_m2(z2).unsqueeze(1) + self.modality_emb[1].view(1, 1, -1)
+        t3 = self.proj_m3(z3).unsqueeze(1) + self.modality_emb[2].view(1, 1, -1)
+        
+        # Sequence of 3 modality tokens: [sMRI, Questionnaires, Phenotypic]
+        T = torch.cat([t1, t2, t3], dim=1)  # (B, 3, d_model)
+        
+        # 2. Cross-multimodal multi-head attention with residual skip
+        T_norm1 = self.norm1(T)
+        attn_out, attn_weights = self.cross_mha(T_norm1, T_norm1, T_norm1)
+        T = T + attn_out
+        
+        # 3. FFN with residual skip
+        T_norm2 = self.norm2(T)
+        T = T + self.ffn(T_norm2)
+        
+        # 4. Attention pooling across the 3 modalities
+        q_pool = self.pool_query.expand(B, -1, -1)  # (B, 1, d_model)
+        pool_logits = torch.bmm(T, q_pool.transpose(1, 2)) / (self.d_model ** 0.5)  # (B, 3, 1)
+        pool_weights = F.softmax(pool_logits, dim=1)  # (B, 3, 1)
+        h_fused = (T * pool_weights).sum(dim=1)  # (B, d_model)
+        
+        # 5. Output risk logit
+        logit = self.classifier(h_fused).squeeze(-1)
+        return logit, attn_weights, pool_weights.squeeze(-1)
+
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"Device for Cross-Attention Fusion: {device}")
+
+# Convert numpy embeddings to PyTorch tensors
+z1_tr_t = torch.FloatTensor(np.array(z1_train, copy=True)).to(device)
+z2_tr_t = torch.FloatTensor(np.array(z2_train, copy=True)).to(device)
+z3_tr_t = torch.FloatTensor(np.array(z3_train, copy=True)).to(device)
+y_tr_t = torch.FloatTensor(np.array(y_train, copy=True)).to(device)
+
+z1_va_t = torch.FloatTensor(np.array(z1_val, copy=True)).to(device)
+z2_va_t = torch.FloatTensor(np.array(z2_val, copy=True)).to(device)
+z3_va_t = torch.FloatTensor(np.array(z3_val, copy=True)).to(device)
+
+z1_te_t = torch.FloatTensor(np.array(z1_test, copy=True)).to(device)
+z2_te_t = torch.FloatTensor(np.array(z2_test, copy=True)).to(device)
+z3_te_t = torch.FloatTensor(np.array(z3_test, copy=True)).to(device)
+
+# Audit verification of sample independence: batch pass vs individual passes
+set_seed(SEED)
+audit_attn_model = CrossMultimodalAttentionFusion(d_m1=z1_train.shape[1], d_m2=z2_train.shape[1], d_m3=z3_train.shape[1], d_model=16, n_heads=2, dropout=0.0).to(device)
+audit_attn_model.eval()
+with torch.no_grad():
+    b_out, _, _ = audit_attn_model(z1_va_t[:5], z2_va_t[:5], z3_va_t[:5])
+    s_out = torch.cat([audit_attn_model(z1_va_t[i:i+1], z2_va_t[i:i+1], z3_va_t[i:i+1])[0] for i in range(5)], dim=0)
+    diff = (b_out - s_out).abs().max().item()
+assert diff < 1e-6, f"VIOLATION: Cross-subject leakage detected in Cross-Attention (diff={diff})!"
+print(f"Sample Independence Verified: Batch vs Single-item forward pass diff = {diff:.8e} (zero leakage)")
+
+# Balanced positive class weighting (156 / 24 = 6.5)
+pos_weight = float((y_train == 0).sum()) / float((y_train == 1).sum())
+bce_weight = torch.tensor([pos_weight], device=device)
+
+# Train model strictly on train partition
+set_seed(SEED)
+cross_attn_model = CrossMultimodalAttentionFusion(d_m1=z1_train.shape[1], d_m2=z2_train.shape[1], d_m3=z3_train.shape[1], d_model=16, n_heads=2, dropout=0.10).to(device)
+optimizer_attn = optim.AdamW(cross_attn_model.parameters(), lr=0.003, weight_decay=1e-2)
+
+best_attn_val_auc = -1.0
+best_attn_state = None
+best_attn_ep = 0
+
+for ep in range(1, 60):
+    cross_attn_model.train()
+    optimizer_attn.zero_grad()
+    logits, _, _ = cross_attn_model(z1_tr_t, z2_tr_t, z3_tr_t)
+    loss = F.binary_cross_entropy_with_logits(logits, y_tr_t, pos_weight=bce_weight)
+    loss.backward()
+    optimizer_attn.step()
+    
+    cross_attn_model.eval()
+    with torch.no_grad():
+        va_logits, _, _ = cross_attn_model(z1_va_t, z2_va_t, z3_va_t)
+        p_va = torch.sigmoid(va_logits).cpu().numpy()
+        va_auc = roc_auc_score(y_val, p_va)
+        if va_auc > best_attn_val_auc:
+            best_attn_val_auc = va_auc
+            best_attn_state = {k: v.cpu().clone() for k, v in cross_attn_model.state_dict().items()}
+            best_attn_ep = ep
+
+print(f"Optimal Checkpoint Selected at Epoch {best_attn_ep} (Val ROC-AUC = {best_attn_val_auc:.4f})")
+
+cross_attn_model.load_state_dict(best_attn_state)
+cross_attn_model.eval()
+with torch.no_grad():
+    va_logits, _, _ = cross_attn_model(z1_va_t, z2_va_t, z3_va_t)
+    te_logits, attn_matrix_te, pool_w_te = cross_attn_model(z1_te_t, z2_te_t, z3_te_t)
+    p_cross_val = torch.sigmoid(va_logits).cpu().numpy()
+    p_cross_test = torch.sigmoid(te_logits).cpu().numpy()
+
+res_cross_attn = compute_complete_metrics(y_val, p_cross_val, y_test, p_cross_test)
+
+print(f"Cross-Multimodal Attention Fusion:")
+print(f"  Validation ROC-AUC:    {res_cross_attn['val_auc']:.4f}")
+print(f"  Held-Out Test ROC-AUC: {res_cross_attn['test_auc']:.4f}")
+print(f"  Held-Out Test PR-AUC:  {res_cross_attn['test_pr']:.4f}")
+print(f"  Held-Out Test F1:      {res_cross_attn['f1']:.4f}")
+print(f"  Sensitivity:           {res_cross_attn['sens']*100:.1f}% ({res_cross_attn['tp']}/{res_cross_attn['tp']+res_cross_attn['fn']})")
+print(f"  Specificity:           {res_cross_attn['spec']*100:.1f}% ({res_cross_attn['tn']}/{res_cross_attn['tn']+res_cross_attn['fp']})")
+print(f"  Adjusted PPV:          {res_cross_attn['ppv_adj']*100:.2f}%")
+print(f"  Adjusted NPV:          {res_cross_attn['npv_adj']*100:.2f}%")
+print(f"  Brier Score:           {res_cross_attn['brier']:.4f}")
+
+# Save model checkpoint
+torch.save(best_attn_state, MODELS_DIR / 'cross_multimodal_attention_fusion.pt')
+print(f"[SAVED] {MODELS_DIR / 'cross_multimodal_attention_fusion.pt'}")
+
+# Save learned cross-attention matrix and modality pooling weights
+modality_names = ['sMRI', 'Questionnaires', 'Phenotypic']
+mean_attn_matrix = attn_matrix_te.mean(dim=0).cpu().numpy()
+df_attn_matrix = pd.DataFrame(mean_attn_matrix, index=[f"Query_{m}" for m in modality_names], columns=[f"Key_{m}" for m in modality_names])
+df_attn_matrix.to_csv(OUT_DIR / 'cross_multimodal_attention_matrix.csv')
+print("\nLearned Cross-Multimodal Attention Matrix (Mean across Held-Out Test Cohort):")
+print(df_attn_matrix.round(4))
+
+mean_pool_weights = pool_w_te.mean(dim=0).cpu().numpy()
+df_pool_weights = pd.DataFrame({
+    'Modality': modality_names,
+    'Mean_Pooling_Weight': np.round(mean_pool_weights, 4),
+    'Percentage': [f"{w*100:.2f}%" for w in mean_pool_weights]
+})
+df_pool_weights.to_csv(OUT_DIR / 'cross_multimodal_pooling_weights.csv', index=False)
+print("\nLearned Modality Attention Pooling Weights:")
+print(df_pool_weights.to_string(index=False))
+
+# Plot Cross-Multimodal Attention Heatmap & Pooling Weights
+fig, (ax_heat, ax_pool) = plt.subplots(1, 2, figsize=(11, 4.8), dpi=300, gridspec_kw={'width_ratios': [1.3, 1]})
+sns.heatmap(mean_attn_matrix, annot=True, fmt='.3f', cmap='Blues',
+            xticklabels=modality_names, yticklabels=modality_names,
+            annot_kws={'fontsize': 11, 'fontweight': 'bold'}, ax=ax_heat)
+ax_heat.set_title("A. Cross-Modal Multi-Head Attention Matrix\n(Query $\\rightarrow$ Key Attention Distribution)", fontsize=11, pad=10)
+ax_heat.set_xlabel("Key Modality Channel", fontsize=10)
+ax_heat.set_ylabel("Query Modality Channel", fontsize=10)
+
+colors_pool = ['#4A90E2', '#F5A623', '#9013FE']
+bars_pool = ax_pool.bar(modality_names, mean_pool_weights * 100, color=colors_pool, edgecolor='black', linewidth=0.8, width=0.5)
+ax_pool.axhline(33.33, color='gray', linestyle='--', linewidth=1.0, label="Equal Weighting (33.3%)")
+ax_pool.set_ylim(0, 50)
+ax_pool.set_ylabel("Modality Pooling Contribution (%)", fontsize=10)
+ax_pool.set_title("B. Learned Modality Pooling Contributions\n(Dynamic Query Attention Pooling)", fontsize=11, pad=10)
+for bar in bars_pool:
+    y_h = bar.get_height()
+    ax_pool.text(bar.get_x() + bar.get_width()/2.0, y_h + 1.0, f"{y_h:.1f}%", ha='center', va='bottom', fontsize=10, fontweight='bold')
+ax_pool.legend(loc='upper right', fontsize=9.5)
+
+plt.tight_layout()
+plt.savefig(OUT_DIR / 'Fig_Cross_Modal_Attention.png', dpi=300)
+plt.savefig(OUT_DIR / 'Fig_Cross_Modal_Attention.tif', dpi=300)
+plt.close()
+print("[SAVED] Fig_Cross_Modal_Attention.png / .tif")
+
+# ==============================================================================
+# FUSION PARADIGM 6: CALIBRATION SUITE & BASE-RATE COMPARISON
+# ==============================================================================
+print("\n" + "=" * 80)
+print("FUSION PARADIGM 6: CALIBRATION SENSITIVITY SUITE (PLATT VS ISOTONIC VS BASE-RATE)")
 print("=" * 80)
 
 def compute_ece(y_true, probs, n_bins=10):
@@ -526,6 +752,7 @@ models_to_test = {
     'Primary Baseline: Simple Average (33/33/33)': p_avg_test,
     'Validation-Tuned Late Fusion (186 Grid)': p_comb_test_186,
     'Intermediate Latent Fusion (37-D)': p_embed_test,
+    'Cross-Multimodal Attention Fusion': p_cross_test,
     'Stacking Meta-Learner': p_stack_test,
     'Module 1: Structural MRI (Pretrained ResNet-18)': p1_test,
     'Module 2: Anxiety Symptomatology (FT-ProtoNet)': p2_test,
@@ -593,8 +820,9 @@ all_evaluated_models = {
     'Multimodal Paradigm 1: Weighted Late Fusion (186 Grid)': res_186,
     'Multimodal Paradigm 3: Stacking Meta-Learner': res_stack,
     'Multimodal Paradigm 4: Intermediate Latent Fusion (37-D)': res_embed,
-    'Multimodal Paradigm 5: Calibrated Late Fusion (Platt)': res_platt,
-    'Multimodal Paradigm 5: Calibrated Late Fusion (Isotonic)': res_iso
+    'Multimodal Paradigm 5: Cross-Multimodal Attention (Transformer)': res_cross_attn,
+    'Multimodal Paradigm 6: Calibrated Late Fusion (Platt)': res_platt,
+    'Multimodal Paradigm 6: Calibrated Late Fusion (Isotonic)': res_iso
 }
 
 table_rows = []
@@ -689,12 +917,14 @@ fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6), dpi=300)
 
 fpr_avg, tpr_avg, _ = roc_curve(y_test, p_avg_test)
 fpr_186, tpr_186, _ = roc_curve(y_test, p_comb_test_186)
+fpr_cross, tpr_cross, _ = roc_curve(y_test, p_cross_test)
 fpr_m1, tpr_m1, _ = roc_curve(y_test, p1_test)
 fpr_m2, tpr_m2, _ = roc_curve(y_test, p2_test)
 fpr_m3, tpr_m3, _ = roc_curve(y_test, p3_test)
 
 ax1.plot(fpr_avg, tpr_avg, color='#2ECC71', lw=2.5, label=f"Simple Average (AUC = {res_avg['test_auc']:.3f})")
 ax1.plot(fpr_186, tpr_186, color='#E74C3C', lw=2.0, linestyle='--', label=f"186 Grid Search (AUC = {res_186['test_auc']:.3f})")
+ax1.plot(fpr_cross, tpr_cross, color='#8E44AD', lw=1.8, linestyle='-.', label=f"Cross-Attention (AUC = {res_cross_attn['test_auc']:.3f})")
 ax1.plot(fpr_m1, tpr_m1, color='#4A90E2', lw=1.8, label=f"M1 sMRI (AUC = {unimodal_res['Module 1: Structural MRI (Pretrained ResNet-18)']['test_auc']:.3f})")
 ax1.plot(fpr_m2, tpr_m2, color='#F5A623', lw=1.5, linestyle=':', label=f"M2 Questionnaire (AUC = {unimodal_res['Module 2: Anxiety Symptomatology (FT-ProtoNet)']['test_auc']:.3f})")
 ax1.plot(fpr_m3, tpr_m3, color='#9013FE', lw=1.5, linestyle=':', label=f"M3 Phenotypic (AUC = {unimodal_res['Module 3: Static Phenotypic (FT-ProtoNet)']['test_auc']:.3f})")
@@ -709,12 +939,14 @@ ax1.legend(loc="lower right", fontsize=9.5)
 # PR Curves
 pr_avg_p, pr_avg_r, _ = precision_recall_curve(y_test, p_avg_test)
 pr_186_p, pr_186_r, _ = precision_recall_curve(y_test, p_comb_test_186)
+pr_cross_p, pr_cross_r, _ = precision_recall_curve(y_test, p_cross_test)
 pr_m1_p, pr_m1_r, _ = precision_recall_curve(y_test, p1_test)
 pr_m2_p, pr_m2_r, _ = precision_recall_curve(y_test, p2_test)
 pr_m3_p, pr_m3_r, _ = precision_recall_curve(y_test, p3_test)
 
 ax2.plot(pr_avg_r, pr_avg_p, color='#2ECC71', lw=2.5, label=f"Simple Average (PR-AUC = {res_avg['test_pr']:.3f})")
 ax2.plot(pr_186_r, pr_186_p, color='#E74C3C', lw=2.0, linestyle='--', label=f"186 Grid Search (PR-AUC = {res_186['test_pr']:.3f})")
+ax2.plot(pr_cross_p, pr_cross_r, color='#8E44AD', lw=1.8, linestyle='-.', label=f"Cross-Attention (PR-AUC = {res_cross_attn['test_pr']:.3f})")
 ax2.plot(pr_m1_r, pr_m1_p, color='#4A90E2', lw=1.8, label=f"M1 sMRI (PR-AUC = {unimodal_res['Module 1: Structural MRI (Pretrained ResNet-18)']['test_pr']:.3f})")
 ax2.plot(pr_m2_r, pr_m2_p, color='#F5A623', lw=1.5, linestyle=':', label=f"M2 Questionnaire (PR-AUC = {unimodal_res['Module 2: Anxiety Symptomatology (FT-ProtoNet)']['test_pr']:.3f})")
 ax2.plot(pr_m3_r, pr_m3_p, color='#9013FE', lw=1.5, linestyle=':', label=f"M3 Phenotypic (PR-AUC = {unimodal_res['Module 3: Static Phenotypic (FT-ProtoNet)']['test_pr']:.3f})")
@@ -765,6 +997,11 @@ json_output = {
         }
     },
     'intermediate_latent_fusion_37d': clean_for_json(res_embed),
+    'cross_multimodal_attention': {
+        'metrics': clean_for_json(res_cross_attn),
+        'learned_attention_matrix': df_attn_matrix.to_dict(),
+        'modality_pooling_weights': df_pool_weights.to_dict(orient='records')
+    },
     'stacking_meta_learner': clean_for_json(res_stack),
     'calibrated_fusion': clean_for_json({
         'platt': res_platt,

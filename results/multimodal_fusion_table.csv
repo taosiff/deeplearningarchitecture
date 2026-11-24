@@ -9,5 +9,6 @@ Baseline: Simple Average (33/33/33),0.6649,0.7377,0.3226,0.7143,0.6545,0.9474,0.
 Multimodal Paradigm 1: Weighted Late Fusion (186 Grid),0.7195,0.6649,0.25,0.5714,0.6182,0.9189,0.2263
 Multimodal Paradigm 3: Stacking Meta-Learner,0.6883,0.7117,0.2963,0.5714,0.7091,0.9286,0.2398
 Multimodal Paradigm 4: Intermediate Latent Fusion (37-D),0.7221,0.7117,0.303,0.7143,0.6182,0.9444,0.2334
-Multimodal Paradigm 5: Calibrated Late Fusion (Platt),0.6649,0.7377,0.3226,0.7143,0.6545,0.9474,0.0999
-Multimodal Paradigm 5: Calibrated Late Fusion (Isotonic),0.7403,0.7013,0.3226,0.7143,0.6545,0.9474,0.0962
+Multimodal Paradigm 5: Cross-Multimodal Attention (Transformer),0.8312,0.5896,0.1905,0.2857,0.7818,0.8958,0.239
+Multimodal Paradigm 6: Calibrated Late Fusion (Platt),0.6649,0.7377,0.3226,0.7143,0.6545,0.9474,0.0999
+Multimodal Paradigm 6: Calibrated Late Fusion (Isotonic),0.7403,0.7013,0.3226,0.7143,0.6545,0.9474,0.0962

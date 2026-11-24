@@ -151,6 +151,63 @@
     "tn": 34,
     "fn": 2
   },
+  "cross_multimodal_attention": {
+    "metrics": {
+      "val_auc": 0.8311688311688312,
+      "test_auc": 0.5896103896103896,
+      "test_pr": 0.1552941176470588,
+      "opt_th": 0.7469741702079773,
+      "f1": 0.19047619047619047,
+      "f1_adj": 0.20313942751615885,
+      "sens": 0.2857142857142857,
+      "spec": 0.7818181818181819,
+      "prec": 0.14285714285714285,
+      "ppv_adj": 0.1575931232091691,
+      "npv": 0.8958333333333334,
+      "npv_adj": 0.8845507976490344,
+      "nns": 28.0,
+      "nne": 6.345454545454544,
+      "brier": 0.23898516595363617,
+      "tp": 2,
+      "fp": 12,
+      "tn": 43,
+      "fn": 5
+    },
+    "learned_attention_matrix": {
+      "Key_sMRI": {
+        "Query_sMRI": 0.5363314151763916,
+        "Query_Questionnaires": 0.404186874628067,
+        "Query_Phenotypic": 0.5177958011627197
+      },
+      "Key_Questionnaires": {
+        "Query_sMRI": 0.23657388985157013,
+        "Query_Questionnaires": 0.30097684264183044,
+        "Query_Phenotypic": 0.21382905542850494
+      },
+      "Key_Phenotypic": {
+        "Query_sMRI": 0.2270946502685547,
+        "Query_Questionnaires": 0.29483628273010254,
+        "Query_Phenotypic": 0.26837512850761414
+      }
+    },
+    "modality_pooling_weights": [
+      {
+        "Modality": "sMRI",
+        "Mean_Pooling_Weight": 0.3310000002384186,
+        "Percentage": "33.10%"
+      },
+      {
+        "Modality": "Questionnaires",
+        "Mean_Pooling_Weight": 0.3596999943256378,
+        "Percentage": "35.97%"
+      },
+      {
+        "Modality": "Phenotypic",
+        "Mean_Pooling_Weight": 0.3093000054359436,
+        "Percentage": "30.93%"
+      }
+    ]
+  },
   "stacking_meta_learner": {
     "val_auc": 0.6883116883116883,
     "test_auc": 0.7116883116883117,

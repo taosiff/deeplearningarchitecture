@@ -1,8 +1,9 @@
 Model,Test AUC,Raw p vs Null (0.50),Raw p vs M1 Baseline,BH FDR q-val vs Null,Bonferroni p vs Null
-Primary Baseline: Simple Average (33/33/33),0.7377,0.002,0.9109,0.014,0.014
-Stacking Meta-Learner,0.7117,0.016,0.9659,0.0561,0.1122
-Intermediate Latent Fusion (37-D),0.7117,0.026,0.892,0.0607,0.182
-Validation-Tuned Late Fusion (186 Grid),0.6649,0.1002,0.8277,0.1652,0.7014
-Module 1: Structural MRI (Pretrained ResNet-18),0.7221,0.118,2.0,0.1652,0.826
-Module 2: Anxiety Symptomatology (FT-ProtoNet),0.5351,0.7695,0.5351,0.7956,1.0
-Module 3: Static Phenotypic (FT-ProtoNet),0.5571,0.7956,0.3908,0.7956,1.0
+Primary Baseline: Simple Average (33/33/33),0.7377,0.002,0.9109,0.016,0.016
+Stacking Meta-Learner,0.7117,0.006,0.948,0.024,0.048
+Intermediate Latent Fusion (37-D),0.7117,0.026,0.892,0.0693,0.208
+Validation-Tuned Late Fusion (186 Grid),0.6649,0.1002,0.8277,0.2004,0.8016
+Module 1: Structural MRI (Pretrained ResNet-18),0.7221,0.1323,2.0,0.2116,1.0
+Cross-Multimodal Attention Fusion,0.5896,0.3848,0.5431,0.513,1.0
+Module 3: Static Phenotypic (FT-ProtoNet),0.5571,0.7984,0.327,0.8036,1.0
+Module 2: Anxiety Symptomatology (FT-ProtoNet),0.5351,0.8036,0.5511,0.8036,1.0
