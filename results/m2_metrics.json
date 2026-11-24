@@ -2,13 +2,13 @@
   "module": "Module 2 (Questionnaires & Behavioral Scales)",
   "architecture": "FT-ProtoNet (Deep Attention + Episodic Few-Shot)",
   "n_features": 9,
-  "val_roc_auc": 0.7455,
-  "test_roc_auc": 0.5247,
-  "test_pr_auc": 0.2119,
+  "val_roc_auc": 0.7429,
+  "test_roc_auc": 0.5351,
+  "test_pr_auc": 0.213,
   "test_sens": 0.5714,
-  "test_spec": 0.6727,
-  "test_ppv": 0.1818,
-  "test_npv": 0.925,
-  "test_brier": 0.2206,
-  "opt_threshold": 0.3538
+  "test_spec": 0.6909,
+  "test_ppv": 0.1905,
+  "test_npv": 0.9268,
+  "test_brier": 0.234,
+  "opt_threshold": 0.388
 }

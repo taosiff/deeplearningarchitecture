@@ -2,13 +2,13 @@
   "module": "Module 3 (Static Demographics, Socioeconomic, Pubertal)",
   "architecture": "FT-ProtoNet (Deep Attention + Episodic Few-Shot)",
   "n_features": 4,
-  "val_roc_auc": 0.8143,
-  "test_roc_auc": 0.5753,
-  "test_pr_auc": 0.2339,
+  "val_roc_auc": 0.8091,
+  "test_roc_auc": 0.5571,
+  "test_pr_auc": 0.2311,
   "test_sens": 0.4286,
-  "test_spec": 0.6727,
-  "test_ppv": 0.1429,
-  "test_npv": 0.9024,
-  "test_brier": 0.2499,
-  "opt_threshold": 0.5004
+  "test_spec": 0.6364,
+  "test_ppv": 0.1304,
+  "test_npv": 0.8974,
+  "test_brier": 0.2485,
+  "opt_threshold": 0.4997
 }

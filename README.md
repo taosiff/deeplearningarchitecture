@@ -14,22 +14,22 @@ Following a methodological audit, this codebase enforces strict zero-leakage pro
 1. **Strict Family Isolation:** Twin pairs are assigned intact to partitions to prevent genetic and shared-environmental contamination (Train: 90 families, 180 subjects, 24 incident cases; Validation: 31 families, 62 subjects, 7 incident cases; Test: 31 families, 62 subjects, 7 incident cases).
 2. **Train-Only Preprocessing:** All scalers, PCA projections ($k=5$ for sMRI), and classifiers are fit strictly on the training partition (`train.csv`). Zero validation or test data enters dimensionality reduction or model fitting.
 3. **Pre-Specified Primary Model (Dawes' Rule of Equal Weighting):**
-   - Fine-grained grid tuning on finite validation cohorts ($n_{\text{val}} = 62$, 7 events) overfits validation data (Validation AUC $0.722 \to$ Test AUC $0.665$, 95% CI $[0.458, 0.879]$ spanning chance).
-   - The unweighted **Simple Average ($1/3, 1/3, 1/3$)** acts as a Bayesian uniform shrinkage prior (Dawes, 1979; Wainer, 1976), achieving held-out **Test ROC-AUC = 0.7403** (95% CI $[0.605, 0.887]$) and **Test F1 = 0.3636** (Sensitivity $85.7\%$, Specificity $63.6\%$, NPV $97.2\%$).
+   - Fine-grained grid tuning on finite validation cohorts ($n_{\text{val}} = 62$, 7 events) overfits validation data (Validation AUC $0.720 \to$ Test AUC $0.665$, 95% CI $[0.461, 0.870]$ spanning chance).
+   - The unweighted **Simple Average ($1/3, 1/3, 1/3$)** acts as a Bayesian uniform shrinkage prior (Dawes, 1979; Wainer, 1976), achieving held-out **Test ROC-AUC = 0.7377** (95% CI $[0.601, 0.881]$) and **Test F1 = 0.3226** (Sensitivity $71.43\%$, Specificity $65.45\%$, NPV $94.74\%$, Adjusted PPV $22.80\%$).
 4. **Modality Performance Reality:**
    - **Module 1 (sMRI, Pretrained Med3D 3D-ResNet-18 + PCA-5):** Test ROC-AUC = **0.7221** (Val AUC = 0.5117). Features pre-extracted from structural T1w scans.
-   - **Module 2 (Questionnaires, FT-ProtoNet):** Test ROC-AUC = **0.5247** (Val AUC = 0.7455).
-   - **Module 3 (Phenotypic, FT-ProtoNet):** Test ROC-AUC = **0.5753** (Val AUC = 0.8143).
-   - **Statistical Multiplicity:** Multimodal fusion is significantly better than chance ($p = 0.004$, BH FDR $q = 0.028$), but does *not* achieve statistically significant superiority over sMRI alone ($p = 0.897$).
+   - **Module 2 (Questionnaires, FT-ProtoNet):** Test ROC-AUC = **0.5351** (Val AUC = 0.7429).
+   - **Module 3 (Phenotypic, FT-ProtoNet):** Test ROC-AUC = **0.5571** (Val AUC = 0.8091).
+   - **Statistical Multiplicity:** Multimodal fusion is significantly better than chance ($p = 0.0020$, BH FDR $q = 0.0140$, Bonferroni $p = 0.0140$), but does *not* achieve statistically significant superiority over sMRI alone ($p = 0.911$).
 5. **Feature Selection & Subpopulation Inversion:**
    - Automated train-only screening across total symptom severity scales (Pearson, ANOVA, Mutual Information, 5-Fold Nested CV) causes subpopulation inversion on held-out test data (Test AUC $\approx 0.32 - 0.40$). This occurs because chronic/persistent anxious controls exhibit high baseline symptoms while incident cases exhibit lower prodromal symptoms.
    - Transition-specific markers (parent-reported somatic complaints `pSDQ03`, muscle tension `SPHERE`, and parent-child symptom discrepancies `diff_26`, `diff_worry`) restore positive test orientation.
 6. **Calibration Disclosure:**
-   - Platt scaling achieves a Brier score of **0.0999** and near-zero ECE (**0.0004**), which matches the uninformative constant base-rate prediction ($7/62 = 11.3\%$, Brier = **0.1002**). This reflects probability shrinkage toward the cohort base rate rather than high-resolution individual risk discrimination.
-7. **Prototypical Network Training vs. Scoring Duality (Modules 2 & 3):**
-   - **Training Episodes:** Each optimization step computes class prototypes from a balanced $12$-shot support set ($|S_0|=12, |S_1|=12$). The episodic cross-entropy loss is evaluated on the leftover query set ($12$ incident vs $144$ control subjects), operating under an extreme $1:12$ query imbalance rather than the cohort base-rate of $1:6.5$.
-   - **Inference & Scoring:** Validation checkpoint selection and test risk scoring compute prototypes across all $180$ training participants ($N_0=156, N_1=24$).
-   - **Methodological Transparency:** The episodic loss optimizes the feature encoder relative to $12$-shot balanced centers, whereas final predictions are scored against full-cohort centroids that the episodic loss never directly regularized. This explains why Modules 2 ($0.525$) and 3 ($0.575$) exhibit limited held-out generalization, and reinforces why the parameter-free Simple Average ($0.740$) relies primarily on structural neuroimaging and uniform shrinkage rather than overfitted prototype heads.
+   - Platt scaling achieves a Brier score of **0.0999** and near-zero ECE (**0.0003**), which matches the uninformative constant base-rate prediction ($7/62 = 11.3\%$, Brier = **0.1002**). This reflects probability shrinkage toward the cohort base rate rather than high-resolution individual risk discrimination.
+7. **Resolution of Prototypical Network Training vs. Scoring Duality (Modules 2 & 3):**
+   - **Training Episodes:** In each training epoch, class prototypes $\mathbf{c}_k$ are computed from a balanced $12$-shot support set ($|S_0|=12, |S_1|=12$). The episodic cross-entropy loss is evaluated on the leftover query set ($12$ incident vs $144$ control subjects).
+   - **Unified Checkpointing & Inference:** Validation checkpoint selection evaluates validation subjects strictly using each episode's $12$-shot support prototypes $\mathbf{c}_k$. The optimal checkpoint saves the model weights along with the frozen support prototypes $\mathbf{c}_k^*$. Test-set risk scoring evaluates queries against these exact same support prototypes $\mathbf{c}_k^*$.
+   - **Methodological Consistency:** The scoring duality is completely eliminated—test centers are built by the exact same $12$-shot support rule as training centers, and the episodic loss directly optimized the network representations against those exact prototype centers.
 
 ---
 

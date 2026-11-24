@@ -232,12 +232,12 @@ def build_fig1():
 
     draw_3d_block(ax, 6.60, 5.5, 3.6, 0.72, depth=0.25, angle=35,
                   face_col='#F1F5F9', top_col='#FFFFFF', side_col='#CBD5E1', edge_col='#94A3B8', zorder=10)
-    ax.text(8.40, 5.86, r"$\mathbf{P}_{\mathrm{Quest}}\ (\mathrm{Test\ AUC:\ 0.525})$", ha='center', va='center',
+    ax.text(8.40, 5.86, r"$\mathbf{P}_{\mathrm{Quest}}\ (\mathrm{Test\ AUC:\ 0.535})$", ha='center', va='center',
             color='#0F172A', fontsize=10.0, fontweight='bold', zorder=30)
 
     draw_3d_block(ax, 12.05, 5.5, 3.6, 0.72, depth=0.25, angle=35,
                   face_col='#F1F5F9', top_col='#FFFFFF', side_col='#CBD5E1', edge_col='#94A3B8', zorder=10)
-    ax.text(13.85, 5.86, r"$\mathbf{P}_{\mathrm{Pheno}}\ (\mathrm{Test\ AUC:\ 0.575})$", ha='center', va='center',
+    ax.text(13.85, 5.86, r"$\mathbf{P}_{\mathrm{Pheno}}\ (\mathrm{Test\ AUC:\ 0.557})$", ha='center', va='center',
             color='#0F172A', fontsize=10.0, fontweight='bold', zorder=30)
 
     # Clean diagonal arrows with prominent w = 1/3 weight badges
@@ -263,7 +263,7 @@ def build_fig1():
     # Threshold Optimization 3D Bar (Rich Gold / Amber)
     draw_3d_block(ax, 4.6, 1.45, 7.6, 0.70, depth=0.25, angle=35,
                   face_col='#D4AC0D', top_col='#F4D03F', side_col='#9A7D0A', edge_col='#4D3E05', zorder=10)
-    ax.text(8.40, 1.88, r"Validation-Derived Decision Threshold ($\tau^* = 0.484$, Youden's $J$)",
+    ax.text(8.40, 1.88, r"Validation-Derived Decision Threshold ($\tau^* = 0.457$, Youden's $J$)",
             ha='center', va='center', color='white', fontsize=10.2, fontweight='bold', zorder=30)
     ax.text(8.40, 1.60, "Threshold Frozen Exclusively from Validation Cohort (Zero Test Reuse)",
             ha='center', va='center', color='#FEF9E7', fontsize=8.0, zorder=30)
@@ -276,9 +276,9 @@ def build_fig1():
                   face_col='#148F77', top_col='#48C9B0', side_col='#0E6252', edge_col='#083E34', zorder=10)
     ax.text(8.40, 0.58, "Prospective Incident Anxiety Prediction (Held-Out Test)", ha='center', va='center',
             color='white', fontsize=11.5, fontweight='bold', zorder=30)
-    ax.text(8.40, 0.28, r"$\mathrm{ROC\text{-}AUC} = 0.7403\ [95\%\ \mathrm{CI}:\ 0.605 - 0.887] \mid F_1 = 0.3636 \mid \mathrm{Sensitivity} = 85.7\%\ (6/7)$",
+    ax.text(8.40, 0.28, r"$\mathrm{ROC\text{-}AUC} = 0.7377\ [95\%\ \mathrm{CI}:\ 0.601 - 0.881] \mid F_1 = 0.3226 \mid \mathrm{Sensitivity} = 71.4\%\ (5/7)$",
             ha='center', va='center', color='white', fontsize=9.0, fontweight='bold', zorder=30)
-    ax.text(8.40, 0.02, r"$\mathrm{Specificity} = 63.6\%\ (35/55) \mid \mathrm{NPV} = 97.2\% \mid \mathrm{Adjusted\ PPV} = 25.3\% \mid \mathrm{NNS} = 9.3$",
+    ax.text(8.40, 0.02, r"$\mathrm{Specificity} = 65.5\%\ (36/55) \mid \mathrm{NPV} = 94.7\% \mid \mathrm{Adjusted\ PPV} = 22.8\% \mid \mathrm{NNS} = 11.2$",
             ha='center', va='center', color='#E8F8F5', fontsize=8.4, zorder=30)
 
     fig.savefig(OUT_DIR / "Fig1_Overall_Framework.png", dpi=300, bbox_inches='tight')
@@ -621,10 +621,10 @@ def build_fig3():
 
     # Card 2: Balanced Episodic Sampling
     draw_pill(ax, 4.90, 0.65, 4.35, 1.80,
-              text="Balanced Support / Query Sampling:\n" +
-                   r"Support: $S = S_0 \cup S_1,\quad |S_0| = |S_1| = 12$" + "\n" +
-                   r"Query: $Q = Q_0 \cup Q_1 \subset \mathcal{D}_{\mathrm{train}}$" + "\n" +
-                   "Eliminates majority class bias (solves 1:6.5 imbalance)",
+              text="Balanced Support Prototype Sampling:\n" +
+                   r"Support: $S = S_0 \cup S_1,\quad |S_0| = |S_1| = 12\ (1:1)$" + "\n" +
+                   r"Query $Q$: 12 incident : 144 controls ($1:12$ ratio)" + "\n" +
+                   "Scoring head strictly frozen from 12-shot support",
               face_col='#F0FDF4', edge_col='#16A34A', text_col='#15803D', font_size=7.4, font_weight='bold')
 
     draw_arrow(ax, 9.65, 1.55, 9.25, 1.55, color='#16A34A', lw=1.6, zorder=20)
@@ -709,11 +709,10 @@ def build_fig4():
             color='#0369A1', fontsize=7.8, fontweight='bold', zorder=25)
 
     # Clean flow from Tokenizer into Transformer at the TOP of Column 3
-    ax.plot([4.55, 5.05], [5.15, 5.15], color='#0284C7', lw=1.8, zorder=15)
-    ax.plot([5.05, 5.05], [5.15, 7.65], color='#0284C7', lw=1.8, zorder=15)
-    draw_arrow(ax, 5.05, 7.65, 5.75, 7.65, color='#0284C7', lw=1.8, zorder=15)
+    ax.plot([4.55, 5.05, 5.05, 5.65], [5.15, 5.15, 7.65, 7.65], color='#0284C7', lw=1.8, zorder=15)
+    draw_arrow(ax, 5.45, 7.65, 5.75, 7.65, color='#0284C7', lw=1.8, zorder=15)
     bbox_tok_exit = dict(boxstyle="round,pad=0.25,rounding_size=0.18", facecolor='#0284C7', edgecolor='none')
-    ax.text(5.05, 7.95, r"$\mathbf{T} \in \mathbb{R}^{D \times 16}$",
+    ax.text(5.35, 7.95, r"$\mathbf{T} \in \mathbb{R}^{D \times 16}$",
             ha='center', va='center', color='white', fontsize=7.6, fontweight='bold', bbox=bbox_tok_exit, zorder=25)
 
     # -------------------------------------------------------------------------
@@ -865,31 +864,30 @@ def build_fig4():
     ax.text(15.25, 6.85, r"$\mathbf{c}_1\ (\mathrm{Class\ 1:\ Incident})$", ha='left', va='center',
             color='#991B1B', fontsize=7.8, fontweight='bold', zorder=25)
 
-    # Prototype Definition Formula Pill (Disclosing Training vs Evaluation Prototypes)
+    # Prototype Definition Formula Pill (Zero Duality: Unified 12-Shot Support Prototypes)
     draw_pill(ax, 14.50, 4.85, 2.70, 1.75,
-              text="Training vs Scoring Prototypes:\n\n" +
-                   r"$\bullet\ \mathbf{c}_k^{\mathrm{train}} = \frac{\sum_{S_k} \mathbf{z}_i}{\|\sum \mathbf{z}_i\|}\ (|S_0|=12, |S_1|=12)$" + "\n" +
-                   r"$(\mathrm{Balanced\ Support\ for\ Episodic\ Loss})$" + "\n\n" +
-                   r"$\bullet\ \mathbf{c}_k^{\mathrm{eval}} = \frac{\sum_{\mathrm{Tr}_k} \mathbf{z}_i}{\|\sum \mathbf{z}_i\|}\ (N_0=156, N_1=24)$" + "\n" +
-                   r"$(\mathrm{Full\text{-}Cohort\ Centroids\ for\ Val/Test})$",
+              text="12-Shot Support Prototypes:\n\n" +
+                   r"$\mathbf{c}_k^* = \frac{\sum_{i \in S_k^*} \mathbf{z}_i}{\|\sum_{i \in S_k^*} \mathbf{z}_i\|_2}\ (|S_0^*|=12, |S_1^*|=12)$" + "\n\n" +
+                   r"Identical 12-shot prototype rule across" + "\n" +
+                   r"training, val checkpointing & test inference",
               face_col='#FFFFFF', edge_col='#9333EA', text_col='#6B21A8', font_size=7.1, font_weight='normal')
 
     draw_arrow(ax, 15.85, 4.85, 15.85, 4.25, color='#9333EA', lw=1.4, zorder=20)
 
-    # Cosine Similarity Logits & Softmax Probability Pill (Scored with Eval Prototypes)
+    # Cosine Similarity Logits & Softmax Probability Pill (Scored with Checkpoint Prototypes)
     draw_pill(ax, 14.50, 2.45, 2.70, 1.80,
               text=r"Cosine Scoring on Test Query $\mathbf{z}^*$:" + "\n\n" +
-                   r"$s_k(\mathbf{z}^*) = \frac{\mathbf{z}^{*T} \mathbf{c}_k^{\mathrm{eval}}}{\tau} = \frac{\cos(\mathbf{z}^*, \mathbf{c}_k^{\mathrm{eval}})}{\tau}$" + "\n\n" +
+                   r"$s_k(\mathbf{z}^*) = \frac{\mathbf{z}^{*T} \mathbf{c}_k^*}{\tau} = \frac{\cos(\mathbf{z}^*, \mathbf{c}_k^*)}{\tau}$" + "\n\n" +
                    r"$P(y = 1 \mid \mathbf{x}^*) = \frac{\exp(s_1)}{\exp(s_0) + \exp(s_1)}$" + "\n" +
                    r"$(\tau \in [0.05, 1.0]\ \mathrm{learnable})$",
               face_col='#F3E8FF', edge_col='#9333EA', text_col='#581C87', font_size=7.2, font_weight='normal')
 
-    # Episodic Optimization Loss Pill (Revealing Query Set Imbalance: 12 cases vs 144 controls = 1:12)
+    # Episodic Optimization Loss Pill (Query Imbalance 1:12 directly optimizing test prototypes)
     draw_pill(ax, 14.50, 0.90, 2.70, 1.35,
               text="Episodic Training Loss:\n" +
-                   r"$\mathcal{L}_{\mathrm{meta}} = -\frac{1}{|Q|} \sum_{q \in Q} \log P(y_q \mid \mathbf{x}_q; \mathbf{c}_k^{\mathrm{train}})$" + "\n" +
+                   r"$\mathcal{L}_{\mathrm{meta}} = -\frac{1}{|Q|} \sum_{q \in Q} \log P(y_q \mid \mathbf{x}_q; \mathbf{c}_k)$" + "\n" +
                    r"Query $Q$: $12\ \mathrm{cases} : 144\ \mathrm{controls}\ (1:12)$" + "\n" +
-                   r"$(\mathrm{Optimized\ on\ 12\text{-}shot;\ Scored\ on\ Full})$",
+                   r"Directly trains prototypes $\mathbf{c}_k^*$ used at test",
               face_col='#7E22CE', edge_col='#581C87', text_col='#FFFFFF', font_size=6.9, font_weight='bold')
 
     draw_arrow(ax, 17.15, 3.35, 17.55, 3.35, color='#0F172A', lw=1.8, zorder=20)

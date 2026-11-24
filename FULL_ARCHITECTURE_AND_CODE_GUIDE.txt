@@ -44,8 +44,8 @@ The Core Epidemiological Challenges:
 
 Key Headline Finding:
   A pre-specified, parameter-free Simple Average (1/3 sMRI + 1/3 Questionnaires + 1/3 Phenotypic) 
-  achieves held-out Test ROC-AUC = 0.7403 (95% CI: [0.605, 0.887]), Test Sensitivity = 85.71% (6/7),
-  Test Specificity = 63.64% (35/55), and NPV = 97.22%.
+  achieves held-out Test ROC-AUC = 0.7377 (95% CI: [0.601, 0.881]), Test Sensitivity = 71.43% (5/7),
+  Test Specificity = 65.45% (36/55), and NPV = 94.74%.
   It outperforms complex validation-tuned weights (Test AUC = 0.6649) because Dawes' Rule of Improper 
   Linear Models demonstrates that on small event counts (7 validation events), equal weighting avoids 
   the noise-fitting penalty of fine-grained optimization.
@@ -160,25 +160,27 @@ The Feature-Tokenizer Prototypical Network (FT-ProtoNet) Micro-Architecture:
      h_pool passes through an MLP (Linear 16 -> LayerNorm -> GELU -> Linear 16) and is L2-normalized:
        z = z_tilde / ||z_tilde||_2 in S^15 (Unit Hypersphere in R^16)
 
-  5. Prototypical Metric Space & The Training vs. Scoring Duality:
+  5. Prototypical Metric Space & Resolution of Training vs. Scoring Duality:
      - Episodic Training: In each training epoch (55 epochs, AdamW lr=0.003, weight_decay=2e-3),
        the model samples 12 incident cases and 12 controls to compute balanced support prototypes:
-         c_k^train = Normalize((1/12) * sum_{i in S_k} z_i)
+         c_k = Normalize((1/12) * sum_{i in S_k} z_i)
        The meta-loss is computed on the remaining training cohort (Query Q = 12 cases vs 144 controls, 1:12 imbalance!):
-         L_meta = -(1/|Q|) * sum_{q in Q} log P(y_q | x_q; c_k^train)
-     - Evaluation & Scoring: To avoid stochastic sampling at test time, inference computes prototypes 
-       across the full 180 training participants:
-         c_k^eval = Normalize((1/N_k) * sum_{i in Train_k} z_i)  [N_0 = 156, N_1 = 24]
-       Test queries are scored via temperature-scaled cosine similarity:
-         s_k(z*) = (z*^T * c_k^eval) / tau  (tau in [0.05, 1.0] learnable)
+         L_meta = -(1/|Q|) * sum_{q in Q} log P(y_q | x_q; c_k)
+     - Evaluation & Scoring (Zero Duality):
+       Validation checkpoint selection evaluates validation subjects strictly against each episode's 
+       support prototypes c_k. The optimal checkpoint saves the model state along with the frozen 12-shot support 
+       prototypes c_k*. Held-out test queries are scored strictly against these exact same support prototypes c_k*:
+         s_k(z*) = (z*^T * c_k*) / tau  (tau in [0.05, 1.0] learnable)
          P_Quest(y = 1 | x*) = exp(s_1) / (exp(s_0) + exp(s_1))
+       This eliminates the training vs. scoring duality: the test centers are built by the exact same 12-shot 
+       support rule as the training centers, and the episodic loss directly regularized the representations against them!
 
 Performance Output:
-  - Validation ROC-AUC: 0.7455 (Overfits to the 7 validation events)
-  - Held-Out Test ROC-AUC: 0.5247 (Near chance in isolation)
+  - Validation ROC-AUC: 0.7429 (Selected at Epoch 41)
+  - Held-Out Test ROC-AUC: 0.5351
   - Test Sensitivity: 57.1% (4 of 7 captured)
-  - Test Specificity: 67.3% (37 of 55 controls spared)
-  - Test NPV: 92.5%
+  - Test Specificity: 69.1% (38 of 55 controls spared)
+  - Test NPV: 92.7%
 
 ====================================================================================================
 5. MODULE 3: STATIC SOCIOECONOMIC & PUBERTAL PHENOTYPING (03_static_module.py)
@@ -196,13 +198,14 @@ Architecture:
   - 2-Layer Pre-LN Transformer Block (Intra-sample attention among demographics & puberty).
   - Query Attention Pooling -> Hypersphere Projection z in S^15.
   - 40 Episodic Training Epochs (AdamW, lr=0.003).
+  - Zero Duality: Evaluated strictly with checkpointed 12-shot support prototypes c_k*.
 
 Performance Output:
-  - Validation ROC-AUC: 0.8143 (High apparent validation performance)
-  - Held-Out Test ROC-AUC: 0.5753
+  - Validation ROC-AUC: 0.8091 (Selected at Epoch 7)
+  - Held-Out Test ROC-AUC: 0.5571
   - Test Sensitivity: 42.9% (3 of 7 captured)
-  - Test Specificity: 67.3% (37 of 55 spared)
-  - Test NPV: 90.2%
+  - Test Specificity: 63.6% (35 of 55 spared)
+  - Test NPV: 89.7%
 
 ====================================================================================================
 6. MULTIMODAL FUSION SUITE & PARADIGM COMPARISON (04_multimodal_fusion.py)
@@ -215,19 +218,19 @@ Summary Comparison Table (Held-Out Test Set N = 62, 7 Incidents, 55 Controls):
 | Framework / Fusion Paradigm                          | Val AUC | Test AUC | Test F1 | Sens   | Spec   | NPV    | Brier  |
 +------------------------------------------------------+---------+----------+---------+--------+--------+--------+--------+
 | Module 1: Structural MRI (3D-ResNet-18 + PCA-5)      | 0.5117  | 0.7221   | 0.2174  | 71.4%  | 38.2%  | 91.3%  | 0.2266 |
-| Module 2: Anxiety Questionnaires (FT-ProtoNet)       | 0.7455  | 0.5247   | 0.2759  | 57.1%  | 67.3%  | 92.5%  | 0.2206 |
-| Module 3: Static Phenotypic (FT-ProtoNet)            | 0.8143  | 0.5753   | 0.2143  | 42.9%  | 67.3%  | 90.2%  | 0.2499 |
+| Module 2: Anxiety Questionnaires (FT-ProtoNet)       | 0.7429  | 0.5351   | 0.2857  | 57.1%  | 69.1%  | 92.7%  | 0.2340 |
+| Module 3: Static Phenotypic (FT-ProtoNet)            | 0.8091  | 0.5571   | 0.2000  | 42.9%  | 63.6%  | 89.7%  | 0.2485 |
 |------------------------------------------------------|---------|----------|---------|--------|--------|--------|--------|
-| Ablation: MRI + Questionnaire (Weights: 0.05 / 0.95) | 0.7455  | 0.5532   | 0.2857  | 57.1%  | 69.1%  | 92.7%  | 0.2183 |
-| Ablation: MRI + Phenotypic    (Weights: 0.05 / 0.95) | 0.5429  | 0.7273   | 0.2500  | 71.4%  | 49.1%  | 93.1%  | 0.2481 |
-| Ablation: Questionnaire + Pheno (0.10 / 0.90)        | 0.7558  | 0.5688   | 0.2857  | 57.1%  | 69.1%  | 92.7%  | 0.2424 |
+| Ablation: MRI + Questionnaire (Weights: 0.05 / 0.95) | 0.7403  | 0.5610   | 0.2759  | 57.1%  | 67.3%  | 92.5%  | 0.2316 |
+| Ablation: MRI + Phenotypic    (Weights: 0.05 / 0.95) | 0.6494  | 0.7117   | 0.3030  | 71.4%  | 61.8%  | 94.4%  | 0.2468 |
+| Ablation: Questionnaire + Pheno (0.30 / 0.70)        | 0.7558  | 0.5558   | 0.2759  | 57.1%  | 67.3%  | 92.5%  | 0.2363 |
 |------------------------------------------------------|---------|----------|---------|--------|--------|--------|--------|
-| PRIMARY HEADLINE: Simple Average (1/3, 1/3, 1/3)     | 0.6649  | 0.7403   | 0.3636  | 85.7%  | 63.6%  | 97.2%  | 0.2191 |
-| Paradigm 1: Validation-Tuned Late Fusion (186 Grid)  | 0.7221  | 0.6649   | 0.2667  | 57.1%  | 65.5%  | 92.3%  | 0.2152 |
-| Paradigm 3: Stacking Meta-Learner (Ridge Logistic)   | 0.7065  | 0.7065   | 0.2857  | 71.4%  | 58.2%  | 94.1%  | 0.2395 |
-| Paradigm 4: Intermediate Latent Fusion (37-D Space)  | 0.7273  | 0.7117   | 0.3111  | 100.0% | 43.6%  | 100.0% | 0.2337 |
-| Paradigm 5: Calibrated Late Fusion (Platt Scaling)   | 0.6649  | 0.7403   | 0.3636  | 85.7%  | 63.6%  | 97.2%  | 0.0999 |
-| Paradigm 5: Calibrated Late Fusion (Isotonic Reg.)   | 0.7403  | 0.7117   | 0.3636  | 85.7%  | 63.6%  | 97.2%  | 0.0949 |
+| PRIMARY HEADLINE: Simple Average (1/3, 1/3, 1/3)     | 0.6649  | 0.7377   | 0.3226  | 71.4%  | 65.5%  | 94.7%  | 0.2259 |
+| Paradigm 1: Validation-Tuned Late Fusion (186 Grid)  | 0.7195  | 0.6649   | 0.2500  | 57.1%  | 61.8%  | 91.9%  | 0.2263 |
+| Paradigm 3: Stacking Meta-Learner (Ridge Logistic)   | 0.6883  | 0.7117   | 0.2963  | 57.1%  | 70.9%  | 92.9%  | 0.2398 |
+| Paradigm 4: Intermediate Latent Fusion (37-D Space)  | 0.7221  | 0.7117   | 0.3030  | 71.4%  | 61.8%  | 94.4%  | 0.2334 |
+| Paradigm 5: Calibrated Late Fusion (Platt Scaling)   | 0.6649  | 0.7377   | 0.3226  | 71.4%  | 65.5%  | 94.7%  | 0.0999 |
+| Paradigm 5: Calibrated Late Fusion (Isotonic Reg.)   | 0.7403  | 0.7013   | 0.3226  | 71.4%  | 65.5%  | 94.7%  | 0.0962 |
 +------------------------------------------------------+---------+----------+---------+--------+--------+--------+--------+
 
 Understanding the Fusion Paradigms:
@@ -292,16 +295,16 @@ The Bimodal Ablation Paradox:
   
   1. The Optimization Trap:
      Pairwise search optimizes weights to maximize validation AUC (62 subjects, 7 events).
-     Because Questionnaire ProtoNet achieved high apparent validation AUC (0.7455), the grid search 
+     Because Questionnaire ProtoNet achieved high apparent validation AUC (0.7429), the grid search 
      converged to extreme weights: w_MRI = 0.05, w_Quest = 0.95!
   2. The Test Set Penalty:
-     On the held-out test cohort, Questionnaire ProtoNet in isolation collapsed to near chance (AUC = 0.5247).
+     On the held-out test cohort, Questionnaire ProtoNet in isolation collapsed to near chance (AUC = 0.5351).
      Because the bimodal combination was 95% dependent on Questionnaires, its test performance collapsed:
-       Test AUC: 0.7221 (MRI alone) -> 0.5532 (MRI + Questionnaire)  [Delta = -0.1923 Generalization Drop!]
+       Test AUC: 0.7221 (MRI alone) -> 0.5610 (MRI + Questionnaire)  [Delta = -0.1611 Generalization Drop!]
   3. Clinical Diagnostic Consequence:
      - MRI + Questionnaire misses 3 of 7 incident cases (False Negatives = 3, Sensitivity = 57.1%).
-     - Equal-Weight Trimodal recovers 2 of those missed cases (False Negatives = 1, Sensitivity = 85.7%),
-       while maintaining 97.2% negative rule-out certainty.
+     - Equal-Weight Trimodal recovers 1 of those missed cases (False Negatives = 2, Sensitivity = 71.4%),
+       while maintaining 94.7% negative rule-out certainty.
 
 ====================================================================================================
 9. INTERPRETABILITY & AUDITING SUITES (05, 06, 07)
@@ -316,7 +319,7 @@ The Bimodal Ablation Paradox:
   1. Leaky Full-Cohort Selection: Artificially inflates AUC to 0.8935 (The bug in the old draft!).
   2. Automated Train-Only Screening (Pearson/ANOVA/Mutual Info): Causes subpopulation inversion (AUC ~ 0.35).
   3. Nested 5-Fold Cross-Validation: Inverts due to chronic vs incident symptom differences.
-  4. Clinical Transition-Vulnerability Selection (Current): Restores positive test orientation (AUC > 0.52).
+  4. Clinical Transition-Vulnerability Selection (Current): Restores positive test orientation (AUC > 0.53).
 
 07_repeated_family_cv.py:
   Runs 5x5 Repeated Family-Stratified Cross-Validation (25 independent folds):
@@ -324,7 +327,7 @@ The Bimodal Ablation Paradox:
   - Re-fits scaler, PCA, and classifiers strictly on training folds.
   - Freezes optimal decision threshold from the training fold.
   - Reports realistic cross-validation mean AUC = 0.642 (IQR: [0.588, 0.692], Range: [0.491, 0.815]),
-    demonstrating that the single test split (0.7403) sits at the upper end of the family-CV distribution.
+    demonstrating that the single test split (0.7377) sits at the upper end of the family-CV distribution.
 
 ====================================================================================================
 10. ARCHITECTURAL TRUTHS & REVIEWER AUDIT SUMMARY
@@ -334,12 +337,14 @@ Summary of Points Resolved in this Repository:
   2. Intact Twin Splits: Zero shared families across train (90), val (31), and test (31).
   3. Pre-Specified Primary Model: Simple Average (33/33/33) pre-specified under Dawes' rule.
   4. Sample Independence in Attention: Max difference between batch and single-item pass < 1e-7.
-  5. Training vs. Scoring Duality Disclosed:
-     - Episodic training uses 12-shot balanced support prototypes and a 1:12 query set.
-     - Evaluation uses full-cohort centroids (156 controls vs 24 cases).
-     - Transparently disclosed in README and Figure 4.
+  5. Training vs. Scoring Duality Eliminated:
+     - Episodic training builds 12-shot balanced support prototypes (12 cases, 12 controls).
+     - Validation checkpointing and test risk inference strictly evaluate against the frozen 12-shot 
+       support prototypes from the selected checkpoint episode.
+     - The episodic loss directly optimized the representations against those exact prototype centers.
+     - Zero duality: Identical prototype head across training and evaluation.
   6. Calibration Honestly Reported: Low Brier score (0.0999) acknowledged as base-rate shrinkage.
-  7. Multiplicity Controlled: Benjamini-Hochberg FDR q = 0.028 vs Null; acknowledged p = 0.897 vs sMRI.
+  7. Multiplicity Controlled: Benjamini-Hochberg FDR q = 0.014 vs Null; acknowledged p = 0.911 vs sMRI.
 
 ====================================================================================================
                                       END OF ARCHITECTURAL GUIDE

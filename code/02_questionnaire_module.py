@@ -257,6 +257,8 @@ optimizer = optim.AdamW(model.parameters(), lr=0.003, weight_decay=2e-3)
 
 best_val_auc = 0.0
 best_state = None
+best_p0 = None
+best_p1 = None
 best_ep = 0
 
 for ep in range(1, 56):
@@ -274,18 +276,18 @@ for ep in range(1, 56):
     loss.backward()
     optimizer.step()
     
-    # Checkpointing strictly on Validation partition
+    # Checkpointing strictly on Validation partition using that episode's support prototypes
     model.eval()
     with torch.no_grad():
-        z_tr = model(X_tr_t)
-        p0_full, p1_full = model.compute_prototypes(z_tr, y_tr_t)
         z_va = model(X_va_t)
-        p_va = model.predict_proba(z_va, p0_full, p1_full).cpu().numpy()
+        p_va = model.predict_proba(z_va, p0, p1).cpu().numpy()
         val_auc = roc_auc_score(y_val, p_va)
         
         if val_auc > best_val_auc:
             best_val_auc = val_auc
             best_state = {k: v.cpu().clone() for k, v in model.state_dict().items()}
+            best_p0 = p0.clone()
+            best_p1 = p1.clone()
             best_ep = ep
 
 print(f"Validation Checkpoint Selected at Epoch {best_ep} (Val ROC-AUC = {best_val_auc:.4f})")
@@ -295,14 +297,13 @@ model.load_state_dict(best_state)
 model.eval()
 with torch.no_grad():
     z_tr = model(X_tr_t)
-    p0_full, p1_full = model.compute_prototypes(z_tr, y_tr_t)
-    
     z_va = model(X_va_t)
     z_te = model(X_te_t)
     
-    p_train_m2 = model.predict_proba(z_tr, p0_full, p1_full).cpu().numpy()
-    p_val_m2 = model.predict_proba(z_va, p0_full, p1_full).cpu().numpy()
-    p_test_m2 = model.predict_proba(z_te, p0_full, p1_full).cpu().numpy()
+    # Evaluate strictly with the checkpointed 12-shot support prototypes (Zero Duality)
+    p_train_m2 = model.predict_proba(z_tr, best_p0, best_p1).cpu().numpy()
+    p_val_m2 = model.predict_proba(z_va, best_p0, best_p1).cpu().numpy()
+    p_test_m2 = model.predict_proba(z_te, best_p0, best_p1).cpu().numpy()
 
 # 6. Optimal Decision Threshold Selection Strictly on Validation Partition
 fpr_va, tpr_va, thresholds_va = roc_curve(y_val, p_val_m2)
@@ -346,8 +347,8 @@ np.save(PROCESSED_DIR / 'm2_test_probs.npy', p_test_m2)
 
 torch.save({
     'model_state_dict': model.state_dict(),
-    'p0': p0_full.cpu(),
-    'p1': p1_full.cpu(),
+    'p0': best_p0.cpu(),
+    'p1': best_p1.cpu(),
     'scaler': scaler,
     'train_medians': train_medians.to_dict(),
     'feature_names': feature_names,
