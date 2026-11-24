@@ -26,6 +26,10 @@ Following a methodological audit, this codebase enforces strict zero-leakage pro
    - Transition-specific markers (parent-reported somatic complaints `pSDQ03`, muscle tension `SPHERE`, and parent-child symptom discrepancies `diff_26`, `diff_worry`) restore positive test orientation.
 6. **Calibration Disclosure:**
    - Platt scaling achieves a Brier score of **0.0999** and near-zero ECE (**0.0004**), which matches the uninformative constant base-rate prediction ($7/62 = 11.3\%$, Brier = **0.1002**). This reflects probability shrinkage toward the cohort base rate rather than high-resolution individual risk discrimination.
+7. **Prototypical Network Training vs. Scoring Duality (Modules 2 & 3):**
+   - **Training Episodes:** Each optimization step computes class prototypes from a balanced $12$-shot support set ($|S_0|=12, |S_1|=12$). The episodic cross-entropy loss is evaluated on the leftover query set ($12$ incident vs $144$ control subjects), operating under an extreme $1:12$ query imbalance rather than the cohort base-rate of $1:6.5$.
+   - **Inference & Scoring:** Validation checkpoint selection and test risk scoring compute prototypes across all $180$ training participants ($N_0=156, N_1=24$).
+   - **Methodological Transparency:** The episodic loss optimizes the feature encoder relative to $12$-shot balanced centers, whereas final predictions are scored against full-cohort centroids that the episodic loss never directly regularized. This explains why Modules 2 ($0.525$) and 3 ($0.575$) exhibit limited held-out generalization, and reinforces why the parameter-free Simple Average ($0.740$) relies primarily on structural neuroimaging and uniform shrinkage rather than overfitted prototype heads.
 
 ---
 
