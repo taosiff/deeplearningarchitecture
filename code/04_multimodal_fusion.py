@@ -634,27 +634,12 @@ try:
 except Exception as _cm_err:
     print(f"[WARN] Could not generate Tableau confusion matrix: {_cm_err}")
 
-# Figure 6: Comparative Ablation Study
-fig, ax = plt.subplots(figsize=(9, 5), dpi=300)
-ab_names = list(ablation_results.keys()) + ['Trimodal: Simple Average', 'Trimodal: 186 Grid Search']
-ab_aucs = [ablation_results[k]['test_auc'] for k in ablation_results] + [res_avg['test_auc'], res_186['test_auc']]
-colors = ['#4A90E2', '#50E3C2', '#F5A623', '#2ECC71', '#E74C3C']
-
-bars = ax.bar(ab_names, ab_aucs, color=colors, width=0.55, edgecolor='black', linewidth=0.8)
-ax.axhline(0.5, color='gray', linestyle='--', linewidth=1.0, label='Chance Baseline (0.50)')
-ax.set_ylim(0.40, 0.85)
-ax.set_ylabel("Held-Out Test ROC-AUC", fontsize=11, labelpad=8)
-ax.set_title("Figure 6: Comparative Ablation Study Across Modality Combinations", fontsize=12, pad=12)
-for bar in bars:
-    yval = bar.get_height()
-    ax.text(bar.get_x() + bar.get_width()/2.0, yval + 0.012, f"{yval:.4f}", ha='center', va='bottom', fontsize=10, fontweight='bold')
-plt.xticks(rotation=15, ha='right', fontsize=9.5)
-plt.legend(loc='upper left', fontsize=10)
-plt.tight_layout()
-plt.savefig(OUT_DIR / 'Fig6_Ablation_Study.png', dpi=300)
-plt.savefig(OUT_DIR / 'Fig6_Ablation_Study.tif', dpi=300)
-plt.close()
-print("[SAVED] Fig6_Ablation_Study.png / .tif")
+# Figure 6: Publication-Grade Tableau-Style Comparative Ablation Study
+try:
+    from generate_tableau_ablation_figure import build_tableau_ablation_figure
+    build_tableau_ablation_figure()
+except Exception as _ab_err:
+    print(f"[WARN] Could not generate Tableau ablation figure: {_ab_err}")
 
 # Figure 7: Bootstrap CI Distribution for Primary Simple Average
 fig, ax = plt.subplots(figsize=(8, 5), dpi=300)
