@@ -106,6 +106,15 @@ def draw_pill(ax, x, y, w, h, text='', face_col='#FFFFFF', edge_col='#94A3B8',
         ax.text(x + w/2.0, y + h/2.0, text, ha='center', va='center',
                 color=text_col, fontsize=font_size, fontweight=font_weight, zorder=zorder+5)
 
+def draw_addition_circle(ax, cx, cy, r=0.20, face_col='#DCFCE7', edge_col='#16A34A', text_col='#14532D', zorder=25):
+    """Draws an explicit circular addition junction with a + sign."""
+    ax.add_patch(patches.Circle((cx, cy), r, facecolor=face_col, edgecolor=edge_col, lw=1.5, zorder=zorder))
+    ax.text(cx, cy, "+", ha='center', va='center', color=text_col, fontsize=12.0, fontweight='bold', zorder=zorder+2)
+
+def draw_branch_dot(ax, cx, cy, r=0.065, col='#0F172A', zorder=25):
+    """Draws a solid branch point dot."""
+    ax.add_patch(patches.Circle((cx, cy), r, facecolor=col, edgecolor='none', zorder=zorder))
+
 def draw_arrow(ax, x1, y1, x2, y2, color='#64748B', lw=1.6, badge='', badge_col='#0284C7', zorder=15):
     """Draws a crisp directional arrow with optional weight badge."""
     ax.annotate('', xy=(x2, y2), xytext=(x1, y1),
@@ -445,130 +454,190 @@ def build_fig2():
 # =========================================================================
 def build_fig3():
     print("Generating Figure 3: Module 2 Questionnaire Pipeline (Logically & Mathematically Aligned)...")
-    fig, ax = plt.subplots(figsize=(16.8, 8.4), dpi=300)
+    fig, ax = plt.subplots(figsize=(17.2, 9.4), dpi=300)
     fig.patch.set_facecolor('#FFFFFF')
     ax.set_facecolor('#FFFFFF')
-    ax.set_xlim(0, 16.8)
-    ax.set_ylim(0.2, 8.6)
+    ax.set_xlim(0, 17.2)
+    ax.set_ylim(0.2, 9.4)
     ax.axis('off')
 
     # Top Title
-    ax.text(8.40, 8.25, "Module 2: Longitudinal Anxiety Symptomatology Pipeline (FT-ProtoNet)",
-            ha='center', va='center', color='#0F172A', fontsize=13.0, fontweight='bold', zorder=30)
+    ax.text(8.60, 9.05, "Module 2: Longitudinal Anxiety Symptomatology Pipeline (FT-ProtoNet)",
+            ha='center', va='center', color='#0F172A', fontsize=13.5, fontweight='bold', zorder=30)
+    ax.text(8.60, 8.72, r"Leakage-Free Preprocessing $\to$ Transition Feature Selection $\to$ Deep Attention ProtoNet $\to$ Episodic Metric Space",
+            ha='center', va='center', color='#475569', fontsize=9.0, fontstyle='italic', zorder=30)
 
+    # -------------------------------------------------------------------------
+    # ROW 1 (FORWARD INFERENCE PIPELINE: y in [3.30, 8.35])
+    # -------------------------------------------------------------------------
+    
     # 1. INPUT: 3D TRANSLUCENT GLASS ISOMETRIC BOX (Left)
-    draw_translucent_cube(ax, 0.40, 3.10, 1.85, 3.20, depth=0.65, angle=32,
+    draw_translucent_cube(ax, 0.40, 3.80, 1.85, 3.80, depth=0.65, angle=32,
                           face_col='#E0F2FE', edge_col='#0284C7', alpha=0.32, lw=1.5, zorder=10)
-    draw_clipboard_vector(ax, 1.35, 4.80, s=0.44, col='#0284C7', zorder=20)
-    ax.text(1.35, 2.50, "Raw Assessments", ha='center', va='center',
+    draw_clipboard_vector(ax, 1.35, 5.80, s=0.45, col='#0284C7', zorder=20)
+    ax.text(1.35, 3.35, "Raw Assessments", ha='center', va='center',
             color='#0F172A', fontsize=10.5, fontweight='bold', zorder=30)
-    ax.text(1.35, 2.10, r"109 Items $\in$ SCAS, SPHERE," + "\nSDQ, MFQ", ha='center', va='center',
+    ax.text(1.35, 2.95, r"109 Items $\in$ SCAS, SPHERE," + "\nSDQ, MFQ", ha='center', va='center',
             color='#64748B', fontsize=7.8, zorder=30)
 
     # Thick cyan arrow to Preprocessing
-    draw_arrow(ax, 2.70, 4.70, 3.20, 4.70, color='#00A3C4', lw=2.4, zorder=15)
+    draw_arrow(ax, 2.70, 5.70, 3.20, 5.70, color='#00A3C4', lw=2.2, zorder=15)
 
     # 2. PREPROCESSING & IMPUTATION (Rounded 3D Card)
-    box_prep = patches.FancyBboxPatch((3.20, 3.40), 2.25, 2.60, boxstyle="round,pad=0.1,rounding_size=0.18",
+    box_prep = patches.FancyBboxPatch((3.20, 3.50), 2.30, 4.40, boxstyle="round,pad=0.1,rounding_size=0.18",
                                       facecolor='#FFFFFF', edgecolor='#00A3C4', lw=1.5, zorder=12)
     ax.add_patch(box_prep)
-    ax.text(4.32, 5.65, "Leakage-Free\nPreprocessing", ha='center', va='center',
-            color='#0F172A', fontsize=9.8, fontweight='bold', zorder=25)
-    ax.text(4.32, 4.75, r"$\mathbf{x}_{\mathrm{norm}} = \frac{\mathbf{x} - \hat{\mu}_{\mathrm{tr}}}{\hat{\sigma}_{\mathrm{tr}}}$",
-            ha='center', va='center', color='#0284C7', fontsize=9.2, fontweight='bold', zorder=25)
-    ax.text(4.32, 3.90, "- In-fold median impute\n- Train StandardScaler\n- Purged sum totals\n  (Zero proxy leakage)",
-            ha='center', va='center', color='#334155', fontsize=7.2, zorder=25)
+    ax.text(4.35, 7.55, "Leakage-Free\nPreprocessing", ha='center', va='center',
+            color='#0F172A', fontsize=10.0, fontweight='bold', zorder=25)
+    ax.text(4.35, 6.70, r"$\mathbf{x}_{\mathrm{norm}} = \frac{\mathbf{x} - \hat{\mu}_{\mathrm{tr}}}{\hat{\sigma}_{\mathrm{tr}}}$",
+            ha='center', va='center', color='#0284C7', fontsize=9.5, fontweight='bold', zorder=25)
+    ax.text(4.35, 5.30, "- In-fold median impute\n- Train-only StandardScaler\n- Purged sum-score totals\n  (Zero proxy leakage)\n- Preserves raw variances\n  without cohort pooling",
+            ha='center', va='center', color='#334155', fontsize=7.4, zorder=25)
+    ax.text(4.35, 3.85, r"$\mathbf{x}_{\mathrm{norm}} \in \mathbb{R}^{109}$",
+            ha='center', va='center', color='#00A3C4', fontsize=8.0, fontweight='bold', zorder=25)
 
     # Thick cyan arrow to Transition Feature Selection
-    draw_arrow(ax, 5.65, 4.70, 6.15, 4.70, color='#00A3C4', lw=2.4, zorder=15)
+    draw_arrow(ax, 5.70, 5.70, 6.20, 5.70, color='#00A3C4', lw=2.2, zorder=15)
 
     # 3. CLINICAL TRANSITION FEATURE SELECTION (Rounded 3D Card - Breaks Polarity Inversion)
-    box_trans = patches.FancyBboxPatch((6.15, 2.90), 2.65, 3.60, boxstyle="round,pad=0.1,rounding_size=0.18",
+    box_trans = patches.FancyBboxPatch((6.20, 3.50), 2.75, 4.40, boxstyle="round,pad=0.1,rounding_size=0.18",
                                        facecolor='#F0FDF4', edgecolor='#16A34A', lw=1.6, zorder=12)
     ax.add_patch(box_trans)
-    ax.text(7.47, 6.18, "9 Transition Markers\n(Resolves Inversion)", ha='center', va='center',
-            color='#15803D', fontsize=9.8, fontweight='bold', zorder=25)
-    ax.text(7.47, 5.40, r"- Somatic Tension:" + "\n" + r"  $\mathrm{pSDQ03}, \mathrm{SPH07,08,22}$",
+    ax.text(7.57, 7.55, "9 Transition Markers\n(Resolves Inversion)", ha='center', va='center',
+            color='#15803D', fontsize=10.0, fontweight='bold', zorder=25)
+    ax.text(7.57, 6.65, r"- Somatic Tension:" + "\n" + r"  $\mathrm{pSDQ03}, \mathrm{SPH07,08,22}$",
             ha='center', va='center', color='#1E293B', fontsize=7.4, zorder=25)
-    ax.text(7.47, 4.55, r"- Social Avoidance:" + "\n" + r"  $\mathrm{pSCAS\_socpho}, \mathrm{pSCAS31}$",
+    ax.text(7.57, 5.80, r"- Social Avoidance:" + "\n" + r"  $\mathrm{pSCAS\_socpho}, \mathrm{pSCAS31}$",
             ha='center', va='center', color='#1E293B', fontsize=7.4, zorder=25)
-    ax.text(7.47, 3.70, r"- Informant Discrepancy:" + "\n" + r"  $\Delta_{26} = \mathrm{pSCAS26} - \mathrm{SCAS26}$" + "\n" + r"  $\Delta_{\mathrm{worry}} = \mathrm{pSCAS31} - \mathrm{SCAS31}$",
-            ha='center', va='center', color='#1E293B', fontsize=7.2, zorder=25)
-    ax.text(7.47, 3.05, r"$\mathbf{x} \in \mathbb{R}^9\ (\mathrm{True\ Pos\ Orientation})$",
-            ha='center', va='center', color='#15803D', fontsize=7.5, fontweight='bold', zorder=25)
+    ax.text(7.57, 4.90, r"- Informant Discrepancy:" + "\n" + r"  $\Delta_{26} = \mathrm{pSCAS26} - \mathrm{SCAS26}$" + "\n" + r"  $\Delta_{\mathrm{worry}} = \mathrm{pSCAS31} - \mathrm{SCAS31}$",
+            ha='center', va='center', color='#1E293B', fontsize=7.3, zorder=25)
+    ax.text(7.57, 3.85, r"$\mathbf{x} \in \mathbb{R}^9\ (\mathrm{True\ Pos\ Orientation})$",
+            ha='center', va='center', color='#15803D', fontsize=7.8, fontweight='bold', zorder=25)
 
     # Thick arrow into FT-ProtoNet
-    draw_arrow(ax, 9.00, 4.70, 9.50, 4.70, color='#16A34A', lw=2.6, zorder=15)
+    draw_arrow(ax, 9.15, 5.70, 9.65, 5.70, color='#16A34A', lw=2.4, zorder=15)
 
     # 4. DEEP ATTENTION PROTOTYPICAL NETWORK (Large 3D Box)
-    draw_3d_block(ax, 9.50, 2.30, 4.00, 4.80, depth=0.35, angle=35,
+    draw_3d_block(ax, 9.65, 3.50, 3.65, 4.40, depth=0.35, angle=35,
                   face_col='#FFFFFF', top_col='#F8FAFC', side_col='#E2E8F0', edge_col='#475569', lw=1.5, zorder=10)
-    ax.text(11.50, 6.82, "Deep Attention ProtoNet", ha='center', va='center',
-            color='#0F172A', fontsize=11.0, fontweight='bold', zorder=25)
+    ax.text(11.47, 7.55, "Deep Attention ProtoNet", ha='center', va='center',
+            color='#0F172A', fontsize=10.5, fontweight='bold', zorder=25)
 
     # Stage 1: Feature Tokenizer Slab
-    draw_3d_block(ax, 9.75, 5.65, 3.50, 0.75, depth=0.18, angle=35,
+    draw_3d_block(ax, 9.85, 6.45, 3.25, 0.65, depth=0.16, angle=35,
                   face_col='#E0F2FE', top_col='#F0F9FF', side_col='#BAE6FD', edge_col='#0284C7', lw=1.0, zorder=15)
-    ax.text(11.50, 6.02, r"$\mathbf{t}_i = x_i \cdot \mathbf{w}_i + \mathbf{b}_i + \mathbf{e}_i \in \mathbb{R}^{16}$",
-            ha='center', va='center', color='#0369A1', fontsize=8.2, fontweight='bold', zorder=25)
+    ax.text(11.47, 6.77, r"$\mathbf{t}_i = x_i \cdot \mathbf{w}_i + \mathbf{b}_i + \mathbf{e}_i \in \mathbb{R}^{16}$",
+            ha='center', va='center', color='#0369A1', fontsize=7.8, fontweight='bold', zorder=25)
 
-    draw_arrow(ax, 11.50, 5.65, 11.50, 5.10, color='#0284C7', lw=1.4, zorder=20)
+    draw_arrow(ax, 11.47, 6.45, 11.47, 6.00, color='#0284C7', lw=1.4, zorder=20)
 
     # Stage 2: 2x Pre-LN Self-Attention Transformer Blocks
-    draw_3d_block(ax, 9.75, 4.10, 3.50, 0.95, depth=0.18, angle=35,
+    draw_3d_block(ax, 9.85, 4.95, 3.25, 0.85, depth=0.16, angle=35,
                   face_col='#F0FDF4', top_col='#F9FEF5', side_col='#DCFCE7', edge_col='#16A34A', lw=1.0, zorder=15)
-    ax.text(11.50, 4.70, r"$\mathrm{Transformer\ Blocks\ (\times 2)}$", ha='center', va='center',
-            color='#15803D', fontsize=8.2, fontweight='bold', zorder=25)
-    ax.text(11.50, 4.30, r"$\mathbf{A} = \mathrm{Softmax}\left(\frac{\mathbf{Q}\mathbf{K}^T}{\sqrt{d_k}}\right)\mathbf{V} + \mathrm{FFN}$",
-            ha='center', va='center', color='#166534', fontsize=7.6, zorder=25)
+    ax.text(11.47, 5.48, r"$\mathrm{Transformer\ Blocks\ (\times 2)}$", ha='center', va='center',
+            color='#15803D', fontsize=7.8, fontweight='bold', zorder=25)
+    ax.text(11.47, 5.15, r"$\mathbf{A} = \mathrm{Softmax}\left(\frac{\mathbf{Q}\mathbf{K}^T}{\sqrt{d_k}}\right)\mathbf{V} + \mathrm{FFN}$",
+            ha='center', va='center', color='#166534', fontsize=7.3, zorder=25)
 
-    draw_arrow(ax, 11.50, 4.10, 11.50, 3.55, color='#16A34A', lw=1.4, zorder=20)
+    draw_arrow(ax, 11.47, 4.95, 11.47, 4.50, color='#16A34A', lw=1.4, zorder=20)
 
     # Stage 3: Query-Based Attention Pooling & Hypersphere Projection
-    draw_3d_block(ax, 9.75, 2.50, 3.50, 1.00, depth=0.18, angle=35,
+    draw_3d_block(ax, 9.85, 3.65, 3.25, 0.70, depth=0.16, angle=35,
                   face_col='#FEF9E7', top_col='#FFFDF7', side_col='#FEF3C7', edge_col='#D97706', lw=1.0, zorder=15)
-    ax.text(11.50, 3.15, r"$\alpha_i = \mathrm{Softmax}\left(\frac{\mathbf{h}_i \cdot \mathbf{q}_{\mathrm{pool}}}{\sqrt{d}}\right),\ \mathbf{z} \in \mathbb{S}^{15}$",
-            ha='center', va='center', color='#92400E', fontsize=8.0, fontweight='bold', zorder=25)
-    ax.text(11.50, 2.75, r"$\mathrm{Pooled\ Embedding:\ } \mathbf{z} = \frac{\mathrm{MLP}(\sum \alpha_i \mathbf{h}_i)}{\|\cdot\|_2}$",
-            ha='center', va='center', color='#B45309', fontsize=7.2, zorder=25)
+    ax.text(11.47, 4.08, r"$\alpha_i = \mathrm{Softmax}\left(\frac{\mathbf{h}_i \cdot \mathbf{q}_{\mathrm{pool}}}{\sqrt{d}}\right),\ \mathbf{z} \in \mathbb{S}^{15}$",
+            ha='center', va='center', color='#92400E', fontsize=7.6, fontweight='bold', zorder=25)
+    ax.text(11.47, 3.80, r"$\mathrm{Embedding:\ } \mathbf{z} = \mathrm{MLP}(\sum \alpha_i \mathbf{h}_i) / \|\cdot\|_2$",
+            ha='center', va='center', color='#B45309', fontsize=7.0, zorder=25)
 
-    # Verified sample independence badge
-    ax.text(11.50, 1.85, r"$\Delta_{\mathrm{batch\ vs\ single}} = 2.50 \times 10^{-7}\ (\mathrm{Invariant})$",
-            ha='center', va='center', color='#15803D', fontsize=7.4, fontweight='bold', zorder=25)
+    # Thick arrow to Latent Metric Space
+    draw_arrow(ax, 13.55, 5.70, 13.95, 5.70, color='#7C3AED', lw=2.4, zorder=25)
 
-    # Thick arrow to Episodic Metric Decision Space
-    draw_arrow(ax, 13.80, 4.70, 14.30, 4.70, color='#6C3483', lw=2.6, zorder=25)
-
-    # 5. EPISODIC FEW-SHOT METRIC HEAD (3D Space on Right)
-    box_metric = patches.FancyBboxPatch((14.30, 0.80), 2.30, 6.90, boxstyle="round,pad=0.1,rounding_size=0.18",
+    # 5. ISOMETRIC 3D HYPERSPHERE METRIC SPACE (Box on Right)
+    box_metric = patches.FancyBboxPatch((13.95, 3.50), 2.95, 4.40, boxstyle="round,pad=0.1,rounding_size=0.18",
                                         facecolor='#FAF5FF', edgecolor='#9333EA', lw=1.6, zorder=12)
     ax.add_patch(box_metric)
-    ax.text(15.45, 7.40, "Episodic Metric Head\n(Few-Shot Prototypes)", ha='center', va='center',
-            color='#7E22CE', fontsize=9.6, fontweight='bold', zorder=25)
+    ax.text(15.42, 7.55, "Episodic Metric Space", ha='center', va='center',
+            color='#7E22CE', fontsize=10.0, fontweight='bold', zorder=25)
 
-    # Shaded Prototype Spheres
-    draw_sphere(ax, 14.85, 6.45, r=0.25, base_col='#10B981', highlight_col='#6EE7B7', edge_col='#047857', zorder=25)
-    ax.text(15.25, 6.45, r"$\mathbf{c}_0\ (\mathrm{Control})$", ha='left', va='center',
-            color='#15803D', fontsize=7.8, fontweight='bold', zorder=25)
+    # 3D Wireframe Prototype Coordinate Space
+    draw_translucent_cube(ax, 14.15, 5.20, 2.30, 1.80, depth=0.45, angle=32,
+                          face_col='#FFFFFF', edge_col='#C084FC', alpha=0.45, lw=1.0, zorder=15)
+    
+    # Control Support Points (Green dots) clustered around c0
+    np.random.seed(42)
+    c0_center = (14.65, 6.30)
+    for _ in range(6):
+        dx, dy = np.random.normal(0, 0.12), np.random.normal(0, 0.10)
+        ax.add_patch(patches.Circle((c0_center[0] + dx, c0_center[1] + dy), 0.05,
+                                    facecolor='#10B981', edgecolor='#047857', lw=0.6, zorder=22))
+    # Control Prototype Star / Large Sphere c0
+    draw_sphere(ax, c0_center[0], c0_center[1], r=0.16, base_col='#10B981', highlight_col='#6EE7B7', edge_col='#047857', zorder=25)
+    ax.text(c0_center[0] + 0.22, c0_center[1] + 0.05, r"$\mathbf{c}_0$", color='#047857', fontsize=8.0, fontweight='bold', zorder=30)
 
-    draw_sphere(ax, 14.85, 5.75, r=0.25, base_col='#EF4444', highlight_col='#FCA5A5', edge_col='#B91C1C', zorder=25)
-    ax.text(15.25, 5.75, r"$\mathbf{c}_1\ (\mathrm{Incident})$", ha='left', va='center',
-            color='#B91C1C', fontsize=7.8, fontweight='bold', zorder=25)
+    # Incident Support Points (Red dots) clustered around c1
+    c1_center = (15.75, 5.75)
+    for _ in range(6):
+        dx, dy = np.random.normal(0, 0.12), np.random.normal(0, 0.10)
+        ax.add_patch(patches.Circle((c1_center[0] + dx, c1_center[1] + dy), 0.05,
+                                    facecolor='#EF4444', edgecolor='#B91C1C', lw=0.6, zorder=22))
+    # Incident Prototype Star / Large Sphere c1
+    draw_sphere(ax, c1_center[0], c1_center[1], r=0.16, base_col='#EF4444', highlight_col='#FCA5A5', edge_col='#B91C1C', zorder=25)
+    ax.text(c1_center[0] + 0.22, c1_center[1] + 0.05, r"$\mathbf{c}_1$", color='#B91C1C', fontsize=8.0, fontweight='bold', zorder=30)
 
-    # Equations for Centroids and Cosine Likelihood
-    ax.text(15.45, 5.00, r"$\mathbf{c}_k = \frac{\sum_{i \in S_k} \mathbf{z}_i}{\|\sum_{i \in S_k} \mathbf{z}_i\|_2} \in \mathbb{S}^{15}$",
-            ha='center', va='center', color='#6B21A8', fontsize=7.8, fontweight='bold', zorder=25)
+    # Query Sample point z_q
+    zq_pt = (15.15, 5.95)
+    ax.add_patch(patches.Circle(zq_pt, 0.07, facecolor='#0284C7', edgecolor='#0369A1', lw=1.0, zorder=24))
+    ax.plot([zq_pt[0], c0_center[0]], [zq_pt[1], c0_center[1]], color='#059669', lw=1.0, linestyle='--', zorder=20)
+    ax.plot([zq_pt[0], c1_center[0]], [zq_pt[1], c1_center[1]], color='#DC2626', lw=1.0, linestyle='--', zorder=20)
+    ax.text(zq_pt[0], zq_pt[1] - 0.16, r"$\mathbf{z}_q$", color='#0369A1', fontsize=7.5, fontweight='bold', ha='center', zorder=30)
 
-    ax.text(15.45, 4.25, r"$P(y = 1 \mid \mathbf{x}) = \frac{\exp(\mathbf{z}^T \mathbf{c}_1 / \tau)}{\sum_k \exp(\mathbf{z}^T \mathbf{c}_k / \tau)}$",
-            ha='center', va='center', color='#4C1D95', fontsize=8.0, fontweight='bold', zorder=25)
+    # Output Probability Formula Pill
+    draw_pill(ax, 14.10, 4.30, 2.65, 0.65,
+              text=r"$P(y = 1 \mid \mathbf{x}) = \frac{\exp(\mathbf{z}^T \mathbf{c}_1 / \tau)}{\sum_k \exp(\mathbf{z}^T \mathbf{c}_k / \tau)}$",
+              face_col='#FFFFFF', edge_col='#9333EA', text_col='#6B21A8', font_size=7.6, font_weight='bold')
 
-    # Output probability pill
-    draw_pill(ax, 14.50, 3.20, 1.90, 0.65, text=r"$\mathbf{P}_{\mathrm{Quest}} \in [0, 1]$",
-              face_col='#FFFFFF', edge_col='#9333EA', text_col='#6B21A8', font_size=8.2, font_weight='bold')
+    # Output prediction pill
+    draw_pill(ax, 14.40, 3.65, 2.05, 0.50, text=r"$\mathbf{P}_{\mathrm{Quest}} \in [0, 1]$",
+              face_col='#FAF5FF', edge_col='#7C3AED', text_col='#581C87', font_size=8.0, font_weight='bold')
 
-    # Test metrics box
-    ax.text(15.45, 1.95, "Held-Out Test (M2):\n" + r"$\mathrm{ROC\text{-}AUC} = 0.5247$" + "\n" + r"$\mathrm{Sensitivity} = 57.1\%$" + "\n" + r"$\mathrm{Specificity} = 67.3\%$" + "\n" + r"$\mathrm{NPV} = 92.5\%$" + "\n" + r"$\mathrm{Brier} = 0.100$",
-            ha='center', va='center', color='#0F172A', fontsize=7.2, fontweight='bold', zorder=25)
+    # -------------------------------------------------------------------------
+    # ROW 2: EPISODIC SUPERVISION & OPTIMIZATION LOOP (y in [0.60, 2.70])
+    # -------------------------------------------------------------------------
+    
+    # Downward arrow from Episodic Metric Space to Loss Cards: routes cleanly down and left into Card 3
+    ax.plot([15.42, 15.42], [3.50, 1.55], color='#7C3AED', lw=1.8, zorder=20)
+    draw_arrow(ax, 15.42, 1.55, 13.90, 1.55, color='#7C3AED', lw=1.8, badge=r'$P(y)$', badge_col='#7C3AED', zorder=20)
+
+    # Card 3: Episodic Meta-Loss Function
+    draw_pill(ax, 9.65, 0.65, 4.20, 1.80,
+              text="Episodic Few-Shot Meta-Loss:\n" +
+                   r"$\mathcal{L}_{\mathrm{meta}} = -\frac{1}{|Q|} \sum_{q \in Q} \log P(y_q \mid \mathbf{x}_q)$" + "\n" +
+                   r"$\nabla_\theta \mathcal{L}_{\mathrm{meta}} \to\ \text{Backpropagated to Network}$",
+              face_col='#FAF5FF', edge_col='#9333EA', text_col='#581C87', font_size=7.6, font_weight='bold')
+
+    # Gradient flow arrows from Meta-Loss UP into Deep Attention ProtoNet
+    draw_arrow(ax, 10.50, 2.45, 10.50, 3.45, color='#9333EA', lw=1.8, badge=r'$\nabla_\theta \mathcal{L}$', badge_col='#7C3AED', zorder=25)
+    draw_arrow(ax, 12.40, 2.45, 12.40, 3.45, color='#9333EA', lw=1.8, zorder=25)
+
+    # Card 2: Balanced Episodic Sampling
+    draw_pill(ax, 4.90, 0.65, 4.35, 1.80,
+              text="Balanced Support / Query Sampling:\n" +
+                   r"Support: $S = S_0 \cup S_1,\quad |S_0| = |S_1| = 12$" + "\n" +
+                   r"Query: $Q = Q_0 \cup Q_1 \subset \mathcal{D}_{\mathrm{train}}$" + "\n" +
+                   "Eliminates majority class bias (solves 1:6.5 imbalance)",
+              face_col='#F0FDF4', edge_col='#16A34A', text_col='#15803D', font_size=7.4, font_weight='bold')
+
+    draw_arrow(ax, 9.65, 1.55, 9.25, 1.55, color='#16A34A', lw=1.6, zorder=20)
+
+    # Card 1: Longitudinal Inversion Audit
+    draw_pill(ax, 0.40, 0.65, 4.15, 1.80,
+              text="Longitudinal Orientation Audit:\n" +
+                   r"$\Delta_{26} = \mathrm{pSCAS26} - \mathrm{SCAS26} > 0$" + "\n" +
+                   r"$\Delta_{\mathrm{worry}} = \mathrm{pSCAS31} - \mathrm{SCAS31} > 0$" + "\n" +
+                   "True prospective signal; zero post-hoc inversion.",
+              face_col='#F8FAFC', edge_col='#0284C7', text_col='#0369A1', font_size=7.4, font_weight='bold')
+
+    draw_arrow(ax, 4.90, 1.55, 4.55, 1.55, color='#0284C7', lw=1.6, zorder=20)
 
     fig.savefig(OUT_DIR / "Fig3_Questionnaire_Pipeline.png", dpi=300, bbox_inches='tight')
     fig.savefig(OUT_DIR / "Fig3_Questionnaire_Pipeline.tif", dpi=300, bbox_inches='tight')
@@ -590,20 +659,22 @@ def build_fig4():
     ax.axis('off')
 
     # Main Title (Centered at Top)
-    ax.text(9.20, 9.55, "Deep Feature-Tokenizer Prototypical Network (FT-ProtoNet) Micro-Architecture",
+    ax.text(9.20, 9.60, "Deep Feature-Tokenizer Prototypical Network (FT-ProtoNet) Micro-Architecture",
             ha='center', va='center', color='#0F172A', fontsize=14.0, fontweight='bold', zorder=30)
+    ax.text(9.20, 9.28, r"Intra-Sample Pre-LN Multi-Head Self-Attention $\to$ Query Attention Pooling $\to$ Episodic Metric Prototypes ($\mathbb{S}^{15}$)",
+            ha='center', va='center', color='#475569', fontsize=9.2, fontstyle='italic', zorder=30)
 
     # -------------------------------------------------------------------------
     # COLUMN 1: RAW INPUT VECTOR (3D Silver Pillar)
     # -------------------------------------------------------------------------
-    draw_3d_block(ax, 0.40, 2.30, 0.85, 5.50, depth=0.25, angle=35,
+    draw_3d_block(ax, 0.40, 2.00, 0.85, 6.20, depth=0.25, angle=35,
                   face_col='#E2E8F0', top_col='#F8FAFC', side_col='#CBD5E1', edge_col='#94A3B8', zorder=10)
-    ax.text(0.82, 5.05, r"$\mathbf{x} = [x_1, \dots, x_D]^T \in \mathbb{R}^D$", ha='center', va='center',
-            color='#0F172A', fontsize=9.2, fontweight='bold', rotation=90, zorder=30)
-    ax.text(0.82, 1.85, r"$D=9\ (\mathrm{M2})$" + "\n" + r"$D=4\ (\mathrm{M3})$", ha='center', va='center',
-            color='#475569', fontsize=7.8, zorder=30)
+    ax.text(0.82, 5.10, r"$\mathbf{x} = [x_1, \dots, x_D]^T \in \mathbb{R}^D$", ha='center', va='center',
+            color='#0F172A', fontsize=9.5, fontweight='bold', rotation=90, zorder=30)
+    ax.text(0.82, 1.55, r"$D=9\ (\mathrm{M2})$" + "\n" + r"$D=4\ (\mathrm{M3})$", ha='center', va='center',
+            color='#475569', fontsize=8.0, zorder=30)
 
-    draw_arrow(ax, 1.45, 5.05, 1.95, 5.05, color='#0F172A', lw=1.8, zorder=15)
+    draw_arrow(ax, 1.45, 5.10, 1.95, 5.10, color='#0F172A', lw=1.8, zorder=15)
 
     # -------------------------------------------------------------------------
     # COLUMN 2: FEATURE TOKENIZER (3D Blue Column)
@@ -613,76 +684,131 @@ def build_fig4():
     ax.add_patch(panel_tok)
     ax.text(3.32, 8.65, "Feature Tokenizer", ha='center', va='center',
             color='#0369A1', fontsize=10.5, fontweight='bold', zorder=25)
-    ax.text(3.32, 8.28, r"$\mathbf{t}_i = x_i \cdot \mathbf{w}_i + \mathbf{b}_i + \mathbf{e}_i$", ha='center', va='center',
+    ax.text(3.32, 8.28, r"$\mathbf{t}_i = x_i \cdot \mathbf{w}_i + \mathbf{b}_i + \mathbf{e}_i \in \mathbb{R}^{16}$", ha='center', va='center',
             color='#0284C7', fontsize=8.5, fontweight='bold', zorder=25)
 
     # 4 Token Slabs
     token_labels = [
         r"$\mathbf{t}_1 \in \mathbb{R}^{16}\ (\mathrm{Somatic})$",
         r"$\mathbf{t}_2 \in \mathbb{R}^{16}\ (\mathrm{Social})$",
-        r"$\dots$",
-        r"$\mathbf{t}_D \in \mathbb{R}^{16}\ (\mathrm{Discrepancy})$"
+        r"$\dots\ (\mathrm{Discrepancy})$",
+        r"$\mathbf{t}_D \in \mathbb{R}^{16}\ (\mathrm{Item\ D})$"
     ]
     for idx, t_lbl in enumerate(token_labels):
-        ty = 7.00 - idx * 1.40
-        draw_3d_block(ax, 2.15, ty, 2.30, 0.75, depth=0.18, angle=35,
+        ty = 7.00 - idx * 1.35
+        draw_3d_block(ax, 2.15, ty, 2.15, 0.70, depth=0.18, angle=35,
                       face_col='#FFFFFF', top_col='#F0F9FF', side_col='#BAE6FD', edge_col='#0284C7', zorder=10)
-        ax.text(3.30, ty + 0.38, t_lbl, ha='center', va='center', color='#0369A1', fontsize=7.6, fontweight='bold', zorder=25)
+        ax.text(3.22, ty + 0.35, t_lbl, ha='center', va='center', color='#0369A1', fontsize=7.6, fontweight='bold', zorder=25)
 
-    ax.text(3.32, 1.40, r"$\mathbf{T} \in \mathbb{R}^{D \times 16}$" + "\n(Token Matrix)", ha='center', va='center',
-            color='#0369A1', fontsize=8.0, fontweight='bold', zorder=25)
+    # Grouping bracket on right edge of token slabs
+    ax.plot([4.35, 4.55], [7.35, 7.35], color='#0284C7', lw=1.4, zorder=15)
+    ax.plot([4.55, 4.55], [2.95, 7.35], color='#0284C7', lw=1.4, zorder=15)
+    ax.plot([4.35, 4.55], [2.95, 2.95], color='#0284C7', lw=1.4, zorder=15)
 
-    draw_arrow(ax, 4.90, 5.05, 5.40, 5.05, color='#0284C7', lw=1.8, zorder=15)
+    ax.text(3.32, 1.45, r"$\mathbf{T} = [\mathbf{t}_1, \dots, \mathbf{t}_D]^T$" + "\n" + r"$\mathbf{T} \in \mathbb{R}^{D \times 16}$ (Token Matrix)", ha='center', va='center',
+            color='#0369A1', fontsize=7.8, fontweight='bold', zorder=25)
+
+    # Clean flow from Tokenizer into Transformer at the TOP of Column 3
+    ax.plot([4.55, 4.90], [5.15, 5.15], color='#0284C7', lw=1.8, zorder=15)
+    ax.plot([4.90, 4.90], [5.15, 7.85], color='#0284C7', lw=1.8, zorder=15)
+    draw_arrow(ax, 4.90, 7.85, 7.85, 7.85, color='#0284C7', lw=1.8, badge=r'$\mathbf{T} \in \mathbb{R}^{D \times 16}$', badge_col='#0284C7', zorder=15)
 
     # -------------------------------------------------------------------------
     # COLUMN 3: INTRA-SAMPLE MULTI-HEAD SELF-ATTENTION TRANSFORMER (Center Panel)
+    # (Textbook Pre-LN Transformer Architecture with Strict Mathematical Routing)
     # -------------------------------------------------------------------------
-    panel_sa = patches.FancyBboxPatch((5.40, 0.80), 4.70, 8.20, boxstyle="round,pad=0.15,rounding_size=0.2",
+    panel_sa = patches.FancyBboxPatch((5.40, 0.80), 4.90, 8.20, boxstyle="round,pad=0.15,rounding_size=0.2",
                                       facecolor='#F0FDF4', edgecolor='#16A34A', lw=1.4, zorder=5)
     ax.add_patch(panel_sa)
-    ax.text(7.75, 8.65, "Self-Attention Transformer Blocks", ha='center', va='center',
+    ax.text(7.85, 8.65, "Pre-LN Transformer Block", ha='center', va='center',
             color='#15803D', fontsize=10.5, fontweight='bold', zorder=25)
-    ax.text(7.75, 8.30, r"$\mathrm{Intra\text{-}Sample\ Attention\ across\ D\ Features\ (2\ Blocks)}$", ha='center', va='center',
+    ax.text(7.85, 8.30, r"$\mathrm{Intra\text{-}Sample\ Multi\text{-}Head\ Attention\ across\ D\ Features}$", ha='center', va='center',
             color='#166534', fontsize=7.8, fontstyle='italic', zorder=25)
+    
+    # Branch Point 1 (Solid Dot)
+    draw_branch_dot(ax, 7.85, 7.55, r=0.065, col='#14532D', zorder=25)
 
-    # Pre-LN Multi-Head Attention Sub-block
-    draw_pill(ax, 5.65, 5.80, 4.20, 2.25,
-              text="Pre-LayerNorm Multi-Head Attention (H = 4):\n\n" +
-                   r"$\tilde{\mathbf{T}} = \mathrm{LayerNorm}(\mathbf{T}),\ d_k = 16 / 4 = 4$" + "\n" +
+    # --- SUB-LAYER 1: PRE-LN MULTI-HEAD ATTENTION ---
+    # LayerNorm 1 Pill
+    draw_pill(ax, 6.70, 6.95, 2.30, 0.45, text=r"$\tilde{\mathbf{T}} = \mathrm{LayerNorm}(\mathbf{T}) \in \mathbb{R}^{D \times 16}$",
+              face_col='#FFFFFF', edge_col='#16A34A', text_col='#166534', font_size=7.4, font_weight='normal')
+    draw_arrow(ax, 7.85, 7.55, 7.85, 6.95, color='#16A34A', lw=1.5, zorder=15)
+
+    # Multi-Head Self-Attention Pill
+    draw_pill(ax, 6.05, 5.25, 3.60, 1.35,
+              text="Multi-Head Attention (H = 4, d_k = 4):\n" +
                    r"$\mathbf{Q}, \mathbf{K}, \mathbf{V} = \tilde{\mathbf{T}} \mathbf{W}_{Q,K,V} \in \mathbb{R}^{D \times 16}$" + "\n" +
                    r"$\mathbf{A} = \mathrm{Softmax}\left(\frac{\mathbf{Q} \mathbf{K}^T}{\sqrt{d_k}}\right) \mathbf{V} \mathbf{W}_{\mathrm{proj}}$",
-              face_col='#FFFFFF', edge_col='#16A34A', text_col='#166534', font_size=7.8, font_weight='normal')
+              face_col='#FFFFFF', edge_col='#16A34A', text_col='#166534', font_size=7.3, font_weight='normal')
+    draw_arrow(ax, 7.85, 6.95, 7.85, 6.60, color='#16A34A', lw=1.5, zorder=15)
 
-    # Curved 3D Black Residual Skip Connection 1 (+)
-    ax.annotate('', xy=(5.65, 4.75), xytext=(5.65, 7.60),
-                arrowprops=dict(arrowstyle="->", lw=1.8, color='black', connectionstyle="arc3,rad=-0.45"),
-                zorder=22)
-    ax.text(5.22, 6.20, r"$\mathbf{H}' = \mathbf{T} + \mathbf{A}$", ha='center', va='center',
-            color='black', fontsize=7.2, fontweight='bold', rotation=90, zorder=25)
+    # Arrow from MHA into Addition Node 1
+    draw_arrow(ax, 7.85, 5.25, 7.85, 4.95, color='#16A34A', lw=1.5, zorder=15)
 
-    # Residual Addition 1 Pill
-    draw_pill(ax, 5.65, 4.45, 4.20, 0.75,
-              text=r"$\mathbf{H}' = \mathbf{T} + \mathbf{A} \in \mathbb{R}^{D \times 16}\ (\mathrm{Residual\ Add\ 1})$",
-              face_col='#DCFCE7', edge_col='#16A34A', text_col='#14532D', font_size=7.8, font_weight='bold')
+    # Residual Skip Connection 1 (Branch 1 -> Left -> Down -> Addition Circle 1)
+    ax.plot([7.85, 5.75], [7.55, 7.55], color='#059669', lw=1.8, zorder=20)
+    ax.plot([5.75, 5.75], [7.55, 4.75], color='#059669', lw=1.8, zorder=20)
+    ax.annotate('', xy=(7.62, 4.75), xytext=(5.75, 4.75),
+                arrowprops=dict(arrowstyle="-|>", lw=1.8, color='#059669', mutation_scale=12), zorder=20)
+    ax.text(5.62, 6.15, r"$\mathrm{Residual\ Skip\ 1}$", ha='center', va='center',
+            color='#047857', fontsize=7.0, fontweight='bold', rotation=90, zorder=25)
+    ax.text(6.65, 4.95, r"$+\mathbf{T}$", ha='center', va='bottom', color='#047857', fontsize=7.6, fontweight='bold', zorder=25)
 
-    draw_arrow(ax, 7.75, 4.45, 7.75, 3.80, color='#16A34A', lw=1.6, zorder=15)
+    # Addition Node 1 (+)
+    draw_addition_circle(ax, 7.85, 4.75, r=0.20, face_col='#DCFCE7', edge_col='#16A34A', text_col='#14532D', zorder=25)
+    ax.text(8.20, 4.75, r"$\mathbf{H}' = \mathbf{T} + \mathbf{A} \in \mathbb{R}^{D \times 16}$", ha='left', va='center',
+            color='#14532D', fontsize=7.8, fontweight='bold', zorder=25)
 
-    # Pre-LN Feedforward MLP Sub-block
-    draw_pill(ax, 5.65, 1.45, 4.20, 2.25,
-              text="Position-Wise Feed-Forward Network:\n\n" +
-                   r"$\tilde{\mathbf{H}}' = \mathrm{LayerNorm}(\mathbf{H}')$" + "\n" +
+    # Intermediate line to Sub-layer 2
+    ax.plot([7.85, 7.85], [4.55, 4.25], color='#16A34A', lw=1.6, zorder=15)
+
+    # Branch Point 2 (Solid Dot)
+    draw_branch_dot(ax, 7.85, 4.25, r=0.065, col='#14532D', zorder=25)
+
+    # --- SUB-LAYER 2: PRE-LN FEED-FORWARD NETWORK ---
+    # LayerNorm 2 Pill
+    draw_pill(ax, 6.70, 3.65, 2.30, 0.45, text=r"$\tilde{\mathbf{H}}' = \mathrm{LayerNorm}(\mathbf{H}') \in \mathbb{R}^{D \times 16}$",
+              face_col='#FFFFFF', edge_col='#16A34A', text_col='#166534', font_size=7.4, font_weight='normal')
+    draw_arrow(ax, 7.85, 4.25, 7.85, 3.65, color='#16A34A', lw=1.5, zorder=15)
+
+    # Feed-Forward Network Pill
+    draw_pill(ax, 6.05, 1.95, 3.60, 1.35,
+              text="Position-Wise FFN (d_ff = 64):\n" +
                    r"$\mathrm{FFN}(\tilde{\mathbf{H}}') = \mathbf{W}_2 \cdot \mathrm{GELU}(\mathbf{W}_1 \tilde{\mathbf{H}}' + \mathbf{b}_1) + \mathbf{b}_2$" + "\n" +
-                   r"$(d_{\mathrm{ff}} = 64,\ \mathrm{Dropout} = 0.15)$",
-              face_col='#FFFFFF', edge_col='#16A34A', text_col='#166534', font_size=7.8, font_weight='normal')
+                   r"$(\mathrm{Dropout} = 0.15,\ \mathrm{Linear}\ 16 \to 64 \to 16)$",
+              face_col='#FFFFFF', edge_col='#16A34A', text_col='#166534', font_size=7.2, font_weight='normal')
+    draw_arrow(ax, 7.85, 3.65, 7.85, 3.30, color='#16A34A', lw=1.5, zorder=15)
 
-    # Curved 3D Black Residual Skip Connection 2 (+)
-    ax.annotate('', xy=(5.65, 1.15), xytext=(5.65, 3.60),
-                arrowprops=dict(arrowstyle="->", lw=1.8, color='black', connectionstyle="arc3,rad=-0.40"),
-                zorder=22)
-    ax.text(5.22, 2.40, r"$\mathbf{H} = \mathbf{H}' + \mathrm{FFN}$", ha='center', va='center',
-            color='black', fontsize=7.2, fontweight='bold', rotation=90, zorder=25)
+    # Arrow from FFN into Addition Node 2
+    draw_arrow(ax, 7.85, 1.95, 7.85, 1.65, color='#16A34A', lw=1.5, zorder=15)
 
-    draw_arrow(ax, 10.30, 5.05, 10.80, 5.05, color='#16A34A', lw=1.8, zorder=15)
+    # Residual Skip Connection 2 (Branch 2 -> Left -> Down -> Addition Circle 2)
+    ax.plot([7.85, 5.75], [4.25, 4.25], color='#059669', lw=1.8, zorder=20)
+    ax.plot([5.75, 5.75], [4.25, 1.45], color='#059669', lw=1.8, zorder=20)
+    ax.annotate('', xy=(7.62, 1.45), xytext=(5.75, 1.45),
+                arrowprops=dict(arrowstyle="-|>", lw=1.8, color='#059669', mutation_scale=12), zorder=20)
+    ax.text(5.62, 2.85, r"$\mathrm{Residual\ Skip\ 2}$", ha='center', va='center',
+            color='#047857', fontsize=7.0, fontweight='bold', rotation=90, zorder=25)
+    ax.text(6.65, 1.65, r"$+\mathbf{H}'$", ha='center', va='bottom', color='#047857', fontsize=7.6, fontweight='bold', zorder=25)
+
+    # Addition Node 2 (+)
+    draw_addition_circle(ax, 7.85, 1.45, r=0.20, face_col='#DCFCE7', edge_col='#16A34A', text_col='#14532D', zorder=25)
+    ax.text(8.20, 1.65, r"$\mathbf{H} = \mathbf{H}' + \mathrm{FFN} \in \mathbb{R}^{D \times 16}$", ha='left', va='bottom',
+            color='#14532D', fontsize=7.8, fontweight='bold', zorder=25)
+
+    # Clean Chaining Badge indicating Layer 1 -> Layer 2 (x2 Blocks)
+    draw_pill(ax, 6.20, 0.90, 3.30, 0.40,
+              text=r"$\mathbf{H}^{(2)} = \mathrm{Layer}_2(\mathrm{Layer}_1(\mathbf{T}))\quad (\times 2\ \mathrm{Blocks})$",
+              face_col='#DCFCE7', edge_col='#16A34A', text_col='#14532D', font_size=7.4, font_weight='bold')
+
+    # Clean Exit Routing from Transformer Block to Column 4 (no bottom dip!)
+    ax.plot([8.05, 10.55], [1.45, 1.45], color='#16A34A', lw=1.8, zorder=15)
+    ax.plot([10.55, 10.55], [1.45, 7.15], color='#16A34A', lw=1.8, zorder=15)
+    draw_arrow(ax, 10.55, 7.15, 10.80, 7.15, color='#16A34A', lw=1.8, zorder=15)
+    
+    bbox_h2 = dict(boxstyle="round,pad=0.25,rounding_size=0.18", facecolor='#16A34A', edgecolor='none')
+    ax.text(10.55, 4.30, r"$\mathbf{H}^{(2)} \in \mathbb{R}^{D \times 16}$" + "\n" + r"$(\mathrm{Contextual\ Sequence})$",
+            ha='center', va='center', color='white', fontsize=7.2, fontweight='bold', bbox=bbox_h2, rotation=90, zorder=25)
 
     # -------------------------------------------------------------------------
     # COLUMN 4: LEARNED ATTENTION POOLING & HYPERSPHERE PROJECTION
@@ -698,21 +824,23 @@ def build_fig4():
               text="Query Attention Pooling:\n\n" +
                    r"$\mathbf{q}_{\mathrm{pool}} \in \mathbb{R}^{16}\ (\mathrm{Learned})$" + "\n\n" +
                    r"$\alpha_i = \frac{\exp(\mathbf{h}_i \cdot \mathbf{q} / \sqrt{d})}{\sum_j \exp(\mathbf{h}_j \cdot \mathbf{q} / \sqrt{d})}$" + "\n\n" +
-                   r"$\mathbf{h}_{\mathrm{pool}} = \sum_{i=1}^D \alpha_i \mathbf{h}_i \in \mathbb{R}^{16}$",
-              face_col='#FFFFFF', edge_col='#D97706', text_col='#92400E', font_size=7.6, font_weight='normal')
+                   r"$\mathbf{h}_{\mathrm{pool}} = \sum_{i=1}^D \alpha_i \mathbf{h}_i \in \mathbb{R}^{16}$" + "\n" +
+                   r"$(\mathrm{Sample\text{-}Level\ Invariance})$",
+              face_col='#FFFFFF', edge_col='#D97706', text_col='#92400E', font_size=7.4, font_weight='normal')
 
     draw_arrow(ax, 12.22, 4.85, 12.22, 4.10, color='#D97706', lw=1.6, zorder=15)
 
     # Stage B: Hypersphere Projection Head
-    draw_pill(ax, 11.00, 1.45, 2.45, 2.50,
+    draw_pill(ax, 11.00, 1.35, 2.45, 2.60,
               text="Projection Head & Norm:\n\n" +
                    r"$\tilde{\mathbf{z}} = \mathrm{MLP}(\mathbf{h}_{\mathrm{pool}}) \in \mathbb{R}^{16}$" + "\n" +
                    r"$(\mathrm{Linear} \to \mathrm{GELU} \to \mathrm{Linear})$" + "\n\n" +
                    r"$\mathbf{z} = \frac{\tilde{\mathbf{z}}}{\|\tilde{\mathbf{z}}\|_2} \in \mathbb{S}^{15}$" + "\n" +
                    r"$(\mathrm{Unit\ Hypersphere})$",
-              face_col='#FEF3C7', edge_col='#D97706', text_col='#78350F', font_size=7.6, font_weight='normal')
+              face_col='#FEF3C7', edge_col='#D97706', text_col='#78350F', font_size=7.5, font_weight='normal')
 
-    draw_arrow(ax, 13.85, 5.05, 14.35, 5.05, color='#D97706', lw=1.8, badge=r'$\mathbf{z} \in \mathbb{S}^{15}$', badge_col='#D97706', zorder=20)
+    # Arrow into Metric Head
+    draw_arrow(ax, 13.85, 2.65, 14.35, 2.65, color='#D97706', lw=1.8, badge=r'$\mathbf{z} \in \mathbb{S}^{15}$', badge_col='#D97706', zorder=20)
 
     # -------------------------------------------------------------------------
     # COLUMN 5: EPISODIC FEW-SHOT METRIC PROTOTYPE HEAD
@@ -742,7 +870,7 @@ def build_fig4():
     draw_arrow(ax, 15.85, 5.15, 15.85, 4.40, color='#9333EA', lw=1.4, zorder=20)
 
     # Cosine Similarity Logits & Softmax Probability Pill
-    draw_pill(ax, 14.55, 2.50, 2.60, 1.80,
+    draw_pill(ax, 14.55, 2.40, 2.60, 1.90,
               text="Cosine Prototype Likelihood:\n\n" +
                    r"$s_k(\mathbf{z}) = \frac{\mathbf{z}^T \mathbf{c}_k}{\tau} = \frac{\cos(\mathbf{z}, \mathbf{c}_k)}{\tau}$" + "\n\n" +
                    r"$P(y = 1 \mid \mathbf{x}) = \frac{\exp(s_1)}{\exp(s_0) + \exp(s_1)}$" + "\n" +
@@ -750,20 +878,20 @@ def build_fig4():
               face_col='#F3E8FF', edge_col='#9333EA', text_col='#581C87', font_size=7.6, font_weight='normal')
 
     # Episodic Optimization Loss Pill
-    draw_pill(ax, 14.55, 1.00, 2.60, 1.25,
+    draw_pill(ax, 14.55, 0.95, 2.60, 1.25,
               text="Episodic Meta-Loss:\n" +
                    r"$\mathcal{L}_{\mathrm{meta}} = -\frac{1}{|Q|} \sum_{q \in Q} \log P(y_q \mid \mathbf{x}_q)$" + "\n" +
                    r"(Solves $\sim 1:6.5$ Imbalance)",
               face_col='#7E22CE', edge_col='#581C87', text_col='#FFFFFF', font_size=7.4, font_weight='bold')
 
-    draw_arrow(ax, 17.55, 5.05, 17.95, 5.05, color='#0F172A', lw=1.8, zorder=20)
+    draw_arrow(ax, 17.15, 3.35, 17.55, 3.35, color='#0F172A', lw=1.8, zorder=20)
 
     # -------------------------------------------------------------------------
     # COLUMN 6: EXTRACTED FEATURES & OUTPUT PREDICTION (3D Silver Pillar)
     # -------------------------------------------------------------------------
-    draw_3d_block(ax, 17.55, 2.30, 0.75, 5.50, depth=0.25, angle=35,
+    draw_3d_block(ax, 17.55, 2.00, 0.75, 6.20, depth=0.25, angle=35,
                   face_col='#E2E8F0', top_col='#F8FAFC', side_col='#CBD5E1', edge_col='#94A3B8', zorder=10)
-    ax.text(17.92, 5.05, r"$\mathbf{P}_{\mathrm{Quest}} = P(y = 1 \mid \mathbf{x}) \in [0, 1]$", ha='center', va='center',
+    ax.text(17.92, 5.10, r"$\mathbf{P}_{\mathrm{Quest}} = P(y = 1 \mid \mathbf{x}) \in [0, 1]$", ha='center', va='center',
             color='#0F172A', fontsize=9.2, fontweight='bold', rotation=90, zorder=30)
 
     fig.savefig(OUT_DIR / "Fig4_Prototypical_Network.png", dpi=300, bbox_inches='tight')
