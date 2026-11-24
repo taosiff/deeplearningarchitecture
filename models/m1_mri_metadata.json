@@ -1,0 +1,10 @@
+{
+  "module": "Module 1 (Structural Neuroimaging / sMRI)",
+  "backbone": "Pretrained 3D ResNet-18 (Med3D)",
+  "dims": 5,
+  "pool_oof_auc": 0.5099,
+  "test_roc_auc": 0.7091,
+  "test_pr_auc": 0.3186,
+  "test_sens": 0.7143,
+  "test_spec": 0.5818
+}

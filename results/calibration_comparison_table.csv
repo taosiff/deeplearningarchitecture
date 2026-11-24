@@ -1,0 +1,4 @@
+Calibration Method,Brier Score,Brier Reduction,10-Bin ECE,Log-Loss,Test ROC-AUC,Test PR-AUC
+Uncalibrated Raw Fusion,0.217,0.0,0.3376,0.6281,0.6597,0.1819
+Platt Scaling (Logistic Sigmoid),0.0998,0.1172,0.0008,0.351,0.6597,0.1819
+Isotonic Regression (Piecewise),0.1055,0.1115,0.0269,0.852,0.5935,0.1436

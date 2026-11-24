@@ -1,0 +1,92 @@
+. Review Comments to the Author
+
+Please use the space provided to explain your answers to the questions above. You may also include additional comments for the author, including concerns about dual publication, research ethics, or publication ethics. (Please upload your review as an attachment if it exceeds 20,000 characters)
+
+Reviewer #1: The authors propose a three-module multimodal framework (3D-CNN on structural MRI; prototypical networks on behavioral questionnaires and on static phenotypic features) combined via calibrated, weight-optimized late fusion, applied to the QTAB twin cohort for early prediction of incident adolescent anxiety. The key methodological contribution is family-level (twin-aware) splitting to prevent co-twin leakage. The reported fusion model achieves test AUC = 0.894, F1 = 0.60, sensitivity = 0.857, specificity = 0.873.
+
+STRENGTHS
+1. Clinically meaningful and well-motivated target (incident anxiety = subclinical-to-clinical transition), rather than cross-sectional detection.
+2. Correct, clearly described twin-aware family-level splitting, which is important and often overlooked in twin/sibling cohorts.
+3. Calibrated late fusion is a sensible, low-parameter choice for a small, imbalanced sample, and is appropriately justified against learned cross-modal attention.
+4. Commendable transparency: the authors explicitly disclose the feature-selection leakage, the small test set, and the single-split design in the Limitations.
+
+MAJOR CONCERNS
+M1. Statistical power and over-claiming.
+With 7 positive test cases, no AUC comparison is significant (DeLong p = 0.109/0.084/0.070), and confidence intervals are very wide (AUC 0.792-0.969; F1 0.417-0.824). The Abstract, Discussion, and Conclusion repeatedly frame the model as providing "robust performance" and a "clinically meaningful and scalable tool." These claims are not supported and must be softened to "preliminary/exploratory" throughout. Please state plainly in the Abstract that AUC improvements did not reach significance.
+
+M2. The "self-attention"/feature-transformation layer is mathematically degenerate.
+In Eqs (8)-(12), Q, K, V are derived from a single vector per sample (h2_residual in R^64), so Q^T K is a scalar and alpha = softmax(scalar) is identically 1 (softmax over a one-element set equals 1, not a "sigmoid-like transformation" as stated near line 375). Therefore h_transformed = alpha * V = V exactly, and the entire Q-K machinery collapses to a single linear projection W_V plus a residual. As written, this component does not perform attention. Please either (a) correct the formulation so it does something non-trivial (e.g., feature-wise gating, or attention across modalities/heads/tokens), or (b) remove the attention framing and describe it accurately as a linear projection with residual gating. The current description is misleading.
+
+M3. Information leakage and validation-set reuse.
+The questionnaire feature selection uses Pearson correlations computed on train+val (n = 242, 31 positives), which the authors acknowledge leaks validation labels. Compounding this, the validation set is also used for calibration, fusion-weight grid search, threshold selection, and early stopping. With only 7 validation positives, these selections are unstable and partially circular. At minimum: (i) repeat the questionnaire pipeline with strictly training-only (or nested-CV) feature selection and report the impact; (ii) clearly enumerate every quantity tuned on validation so readers can judge the independence of the test estimate.
+
+M4. MRI module: clarify model selection.
+Page 9 states the MRI probability is "taken from the best performing classifier (Random Forest; test AUC = 0.745)" while also saying ensemble performance was "evaluated on the validation set." Please clarify whether the best classifier was selected by validation or by TEST AUC. If selection used the test set, this is test-set leakage and must be corrected.
+
+M5. Construct overlap in the target.
+The target (child SCAS >= 30 at follow-up) is predicted largely from baseline parent/child anxiety questionnaire items (top predictors pSCAS32, pSCAS18, pSCAS30). This is legitimate prediction (predictors at baseline, outcome at follow-up), but it means the strong questionnaire performance substantially reflects baseline subclinical anxiety symptoms predicting later anxiety, an expected autocorrelation that limits the novelty of "early prediction." Please discuss this explicitly. Also justify the single SCAS cutoff of 30 across the full 9-18 age range and both sexes, and consider label noise / regression-to-the-mean for scores near the threshold (a 29-to-31 transition may be measurement noise). A sensitivity analysis around the cutoff would strengthen the work.
+
+M6. Single split + tiny validation set undermine the tuned components.
+Fusion weights (0.23/0.63/0.14), calibrators, and thresholds are all optimized on a 7-positive validation set and reported on a 7-positive test set, from one partition. Repeated family-stratified cross-validation across multiple seeds (with the full pipeline) is needed before the weight pattern and performance can be treated as stable. The current "63% questionnaire / 23% MRI / 14% phenotypic" narrative is likely high-variance.
+
+MINOR CONCERNS AND REQUIRED CORRECTIONS
+
+
+1. Equation cross-references are wrong. The text cites "Eq (4.1)" (line ~256), "Eq (4.2)" (~336), "Eq (4.29)" (~409), "Eq (5.1)" and "Eq (4.64)" (~534), but equations are numbered (1)-(39). These appear to be leftover from an earlier draft/thesis numbering and must be fixed.
+
+2. Inconsistent sample sizes. Methods report "422 twin adolescents (211 families) at baseline," while Limitation 4 states "n = 304 out of 478 total QTAB participants with baseline assessments." Reconcile 422 vs. 478.
+
+3. Text-figure dimensional inconsistencies. Module 2 text says 40-D input -> 64-D projection, "32-D embedding partitioned into four 8-D heads," and scaling by sqrt(64); Module 3 says 76-D -> 64-D embedding with four 16-D heads. Fig 4 shows 76-D input, 128-D hidden, 64-D embedding, four 16-D heads, and softmax(QK^T/sqrt(128)). The figure does not match the Module 2 description (where does the 32-D embedding come from? what is the 64->32 step?). Please reconcile all dimensions across text and Figs 3-4.
+
+4. Inconsistent reporting of improvement. Improvements are quoted as "11 percentage points" (Abstract), "11.74 percentage points" (~line 540), "+15.1%" (relative, ~line 614/697), and "11.4% over best pairwise" (~line 565). Standardize absolute vs. relative gains and use one convention.
+
+5. Reference quality. Several citations are non-archival web/topic pages rather than primary sources, e.g., refs 50-53 are ScienceDirect "topics" encyclopedia pages (grid search, Youden index, multimodal fusion), ref 5 (ResearchGate), and ref 31 (labsolver page). Replace with primary peer-reviewed or textbook sources.
+
+6. Calibration with 7 positives. Isotonic regression fit on a validation set with 7 positives is unreliable; consider Platt scaling or report sensitivity to calibration method.
+
+7. Clinical utility framing. At 11.3% prevalence and precision 0.46, roughly half of flagged adolescents are false positives. Please discuss PPV/NPV and number-needed-to-screen rather than emphasizing AUC/F1 alone.
+
+8. Bootstrap and twin structure. Good that you note family structure is not preserved in the bootstrap; consider a cluster (family) bootstrap to avoid underestimating CI width.
+
+The framework and the twin-aware design are valuable, but the empirical claims currently exceed what a single split with 7 test positives can support, and two correctness issues (degenerate attention; ambiguous MRI model selection) plus acknowledged leakage must be resolved. I recommend: (1) repeated family-stratified cross-validation with the full pipeline; (2) strictly leakage-free feature selection; (3) correcting or re-describing the attention layer; (4) fixing the bootstrap threshold procedure; (5) reconciling all numeric/figure/equation inconsistencies; (6) releasing code; and (7) tempering all conclusions to "preliminary." I would be glad to review a revised version.
+
+Reviewer #2: The manuscript addresses an important research problem and presents a promising multimodal framework for adolescent anxiety prediction. However, the following revisions are recommended to improve the quality, rigor, and clarity of the manuscript:
+
+1. Clearly highlight the novelty and unique contributions of the proposed framework in comparison with existing multimodal psychiatric prediction studies.
+2. Provide a more detailed discussion on the limitations associated with the relatively small sample size, particularly the limited number of positive cases.
+3. Reconsider the feature selection strategy in Module 2, as the use of both training and validation data may introduce information leakage. A training-only feature selection approach or nested cross-validation is recommended.
+4. Explicitly discuss the absence of external validation and its impact on the generalizability of the proposed framework.
+5. Incorporate additional explainability analyses, such as SHAP values, feature importance rankings, Grad-CAM visualizations, or prototype interpretation examples.
+6. Provide a clearer justification for the selected fusion weight optimization ranges.
+7. Include details regarding hardware specifications, training time, computational complexity, and reproducibility.
+8. Carefully revise the manuscript for grammatical, typographical, and stylistic issues.
+9. Condense repetitive discussions in the Introduction and Related Work sections to improve readability.
+10. Add a table summarizing all hyperparameters and training configurations used in the proposed framework.
+11. Enhance image resolution and quality.
+12. Strengthen the limitations section by discussing class imbalance, limited positive samples, lack of external validation, and potential family-level correlations.
+
+Reviewer #3: Although the study contains significant limitations involving sample size, particular methodological choices, and replication that the authors specifically note, it outlines a technically competent piece of research and makes appropriate, measured conclusions based on its results.
+
+The researchers demonstrate rigorous experimental design in several areas, particularly by implementing a twin-aware, family-level data splitting protocol (60% training, 20% validation, 20% test). This acts as a crucial control to prevent genetic information leakage between co-twins, addressing a major methodological gap in twin-based prediction studies. Furthermore, they apply 2,000 rounds of stratified percentile bootstrapping to responsibly quantify model uncertainty and provide 95% confidence intervals.
+
+However, there are deviations from strict methodological rigor:
+-The authors acknowledge a methodological flaw where they computed Pearson correlations for questionnaire feature selection using the combined training and validation partitions rather than the training data alone. They state that this introduces "minor information leakage" and deviates from strictly nested cross-validation, but justify it as necessary due to the extreme class imbalance in the training set.
+
+-The study relies on a single data split rather than repeated k-fold cross-validation, which the authors note makes the performance metrics sensitive to this specific data partition. They cite computational constraints as the reason for this choice.
+
+The experiments face significant challenges regarding sample size. While the initial dataset included 422 twin adolescents at baseline, only 304 participants had complete multimodal data for the study. More critically, the target variable is severely imbalanced, with only 38 positive cases of incident anxiety (12.5%) compared to 266 negative cases. This results in a very small held-out test set of 62 samples with only 7 positive cases.
+
+Regarding replication, the authors acknowledge that the study currently lacks external validation. They state that validating the model on independent adolescent anxiety cohorts is a "high-priority direction for future work" to prove true generalizability.
+
+Despite the limitations, the conclusions are drawn appropriately because the authors are highly transparent about the constraints of their data.
+
+They conclude that their multimodal framework achieves an AUC of 0.894, representing an 11-percentage point gain over the best pairwise combination. However, they appropriately temper this finding by explicitly stating that the AUC differences did not reach statistical significance (DeLong p>0.05) due to the limited statistical power of their small test set. They highlight the wide confidence intervals caused by the small number of positive samples (e.g., F1-score 95% CI: 0.417–0.824) and do not overstate the model's immediate clinical readiness. The conclusion that behavioral data plays the dominant predictive role is directly supported by their optimized late fusion weights, which allocated 63% to questionnaires, 23% to MRI, and 14% to phenotypic data.
+
+Overall, while the small sample size and feature selection leakage are technical weaknesses, the manuscript is scientifically sound because the methodology is transparent, the controls for twin-leakage are innovative, and the authors' conclusions do not overreach the statistical limitations of their data.
+
+Reviewer #4: In general, the topic of adolescent anxiety disorder, is very important, and I welcome any research that can improve any early detection. Additionally, the idea of fusion of 3 different sources is very good, and we can see that in various biomedicine, this effort, of combining different aspect of the problem, is not preformed. Hence this methodology is very welcome.
+Regarding this article:
+1. My biggest concern regarding their results is that they have 7 anxiety-positive cases of 62 cases. It’s a small number. Its explicitly written in the limitation section, though, if there is anything they can do to have larger numbers that will be great.
+2. figure 6, is very interesting, and I think it’s not elaborated/well explained in the article (only mentioned at the top of page 18). we see modality combination, e.g. the 3 permutations of any 2 sources out of the 3. But what interesting is that any combination of the 2 yield a small upshift above the score of the leading source (in that pair), but when combining the 3 we get a huge improvement. May be I’m missing something here, but given every 2 pair small upshift, I would expect a more modest upshift when combining the 3. Since its an unexpected upshift, I think this upshift should be more explained.
+3. Table 3 expose numbers but in the body of the article they look different, for example M1 ROC-AUC in the table is 0.7455 but in the body of the article (line 415) its written 0.782, I think there are additional mismatches in the table. Maybe I didn’t understand how to read the table, but if that the case, may be there is a need to elaborate about the expected differences. I suspect their additional numbers mismatch along the article, though, I’m not sure.
+4. Table 2 line has no kind of heading (not the columns, the lines), I would except to see some kind of header/type for every line, currently there are only references and explanations columns

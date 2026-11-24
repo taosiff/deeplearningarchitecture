@@ -1,0 +1,71 @@
+{
+  "module2_top_features": [
+    {
+      "rank": 1,
+      "feature": "pSDQ03",
+      "importance": 0.1172
+    },
+    {
+      "rank": 2,
+      "feature": "SPHERE08",
+      "importance": 0.0509
+    },
+    {
+      "rank": 3,
+      "feature": "diff_26",
+      "importance": 0.0414
+    },
+    {
+      "rank": 4,
+      "feature": "SCAS_socpho_score",
+      "importance": 0.0334
+    },
+    {
+      "rank": 5,
+      "feature": "SPHERE22",
+      "importance": 0.029
+    },
+    {
+      "rank": 6,
+      "feature": "SPHERE07",
+      "importance": 0.0283
+    },
+    {
+      "rank": 7,
+      "feature": "diff_worry",
+      "importance": 0.0177
+    },
+    {
+      "rank": 8,
+      "feature": "pSCAS31",
+      "importance": 0.0149
+    },
+    {
+      "rank": 9,
+      "feature": "pSCAS_socpho_score",
+      "importance": 0.0128
+    }
+  ],
+  "module3_top_features": [
+    {
+      "rank": 1,
+      "feature": "pPDS01_ses01",
+      "importance": 0.0005
+    },
+    {
+      "rank": 2,
+      "feature": "birth_IRSD_decile",
+      "importance": 0.0004
+    },
+    {
+      "rank": 3,
+      "feature": "birth_IER_decile",
+      "importance": 0.0003
+    },
+    {
+      "rank": 4,
+      "feature": "birth_IRSAD_decile",
+      "importance": 0.0001
+    }
+  ]
+}

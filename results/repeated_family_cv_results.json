@@ -1,0 +1,60 @@
+{
+  "n_repeats": 5,
+  "n_splits": 5,
+  "total_folds": 25,
+  "cohort_total_n": 304,
+  "cohort_pos_n": 45,
+  "unique_families": 152,
+  "summary": [
+    {
+      "Model / Architecture": "Module 1: sMRI (Pretrained ResNet-18)",
+      "Mean Out-of-Fold ROC-AUC": 0.5264,
+      "SD ROC-AUC": 0.0797,
+      "95% CI ROC-AUC": "[0.4951, 0.5576]",
+      "Mean PR-AUC": 0.1844,
+      "Mean F1": 0.3182,
+      "Mean Sensitivity": 0.8044,
+      "Mean Specificity": 0.4295
+    },
+    {
+      "Model / Architecture": "Module 2: Questionnaires (Transition)",
+      "Mean Out-of-Fold ROC-AUC": 0.6016,
+      "SD ROC-AUC": 0.0564,
+      "95% CI ROC-AUC": "[0.5795, 0.6237]",
+      "Mean PR-AUC": 0.2509,
+      "Mean F1": 0.3783,
+      "Mean Sensitivity": 0.5911,
+      "Mean Specificity": 0.7234
+    },
+    {
+      "Model / Architecture": "Module 3: Phenotypic (Transition)",
+      "Mean Out-of-Fold ROC-AUC": 0.6334,
+      "SD ROC-AUC": 0.1052,
+      "95% CI ROC-AUC": "[0.5922, 0.6746]",
+      "Mean PR-AUC": 0.288,
+      "Mean F1": 0.3925,
+      "Mean Sensitivity": 0.6933,
+      "Mean Specificity": 0.6535
+    },
+    {
+      "Model / Architecture": "Trimodal Fusion: Simple Average (33/33/33)",
+      "Mean Out-of-Fold ROC-AUC": 0.6432,
+      "SD ROC-AUC": 0.0712,
+      "95% CI ROC-AUC": "[0.6153, 0.6711]",
+      "Mean PR-AUC": 0.2666,
+      "Mean F1": 0.3772,
+      "Mean Sensitivity": 0.8,
+      "Mean Specificity": 0.5471
+    },
+    {
+      "Model / Architecture": "Trimodal Fusion: Balanced Late (25/45/30)",
+      "Mean Out-of-Fold ROC-AUC": 0.6448,
+      "SD ROC-AUC": 0.0661,
+      "95% CI ROC-AUC": "[0.6188, 0.6707]",
+      "Mean PR-AUC": 0.2655,
+      "Mean F1": 0.3755,
+      "Mean Sensitivity": 0.7733,
+      "Mean Specificity": 0.5651
+    }
+  ]
+}

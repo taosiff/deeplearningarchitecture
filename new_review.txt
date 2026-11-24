@@ -1,0 +1,234 @@
+Comments to the Author
+
+1. If the authors have adequately addressed your comments raised in a previous round of review and you feel that this manuscript is now acceptable for publication, you may indicate that here to bypass the “Comments to the Author” section, enter your conflict of interest statement in the “Confidential to Editor” section, and submit your "Accept" recommendation.
+
+Reviewer #1: (No Response)
+
+Reviewer #3: All comments have been addressed
+
+Reviewer #4: All comments have been addressed
+
+2. Is the manuscript technically sound, and do the data support the conclusions?
+
+The manuscript must describe a technically sound piece of scientific research with data that supports the conclusions. Experiments must have been conducted rigorously, with appropriate controls, replication, and sample sizes. The conclusions must be drawn appropriately based on the data presented.
+
+Reviewer #1: No
+
+Reviewer #3: (No Response)
+
+Reviewer #4: Yes
+
+3. Has the statistical analysis been performed appropriately and rigorously?
+
+Reviewer #1: No
+
+Reviewer #3: (No Response)
+
+Reviewer #4: Yes
+
+4. Have the authors made all data underlying the findings in their manuscript fully available?
+
+The PLOS Data policy requires authors to make all data underlying the findings described in their manuscript fully available without restriction, with rare exception (please refer to the Data Availability Statement in the manuscript PDF file). The data should be provided as part of the manuscript or its supporting information, or deposited to a public repository. For example, in addition to summary statistics, the data points behind means, medians and variance measures should be available. If there are restrictions on publicly sharing data—e.g. participant privacy or use of data from a third party—those must be specified.
+
+Reviewer #1: Yes
+
+Reviewer #3: (No Response)
+
+Reviewer #4: Yes
+
+5. Is the manuscript presented in an intelligible fashion and written in standard English?
+
+PLOS ONE does not copyedit accepted manuscripts, so the language in submitted articles must be clear, correct, and unambiguous. Any typographical or grammatical errors should be corrected at revision, so please note any specific errors here.
+
+Reviewer #1: No
+
+Reviewer #3: (No Response)
+
+Reviewer #4: Yes
+
+6. Review Comments to the Author
+
+Please use the space provided to explain your answers to the questions above. You may also include additional comments for the author, including concerns about dual publication, research ethics, or publication ethics. (Please upload your review as an attachment if it exceeds 20,000 characters)
+
+Reviewer #1: I thank the authors for a substantial revision, and particularly for releasing the code. Below I record where my previous points stand, then the new concerns. R1 is what changed my assessment, so I set it out in full.
+
+STATUS OF MY FIRST-ROUND COMMENTS
+
+Fully addressed, and I am glad to say so:
+
+M1, over-claiming, where the Abstract now names the test set size and states that AUC comparisons did not reach significance, "robust performance" is gone and the Introduction reframes the work as proof-of-concept; M5, construct overlap, where the new subsection is honest and well argued; minor 2, 422 vs 478 reconciled, though see R3; minor 7, clinical utility, with one numeric error at R8; and minor 8, cluster bootstrap, acknowledged for future work. Mostly addressed: minor 3, Fig 4 redrawn correctly as to layer sizes, residual mismatches at minor 4; minor 4, one stray "11.74 pp" left; minor 5, refs 31 and 50 to 52 now proper.
+
+Still outstanding:
+
+M2, degenerate attention: DESCRIPTION CORRECTED, and the correction exposes a more serious problem. See R2.
+
+M3, leakage and validation reuse: NOT ADDRESSED, and the new disclosure is inaccurate. R1(e) shows Modules 2 and 3 have no validation partition at all. Reviewer 2's comment 3 asked for the same training-only feature selection and was also declined.
+
+M4, MRI model selection: NOT ADDRESSED. The manuscript now says "Classifier selection was performed exclusively on the validation set" and the response says "There is no test-set leakage." The Module 1 notebook selects with best = max(results.items(), key=lambda x: (x[1]['val'] + x[1]['test']) / 2), so test AUC carries half the criterion. Random Forest also has the best validation AUC (0.6987 against 0.5688), so the outcome is unaffected, but the stated procedure is not the one implemented.
+
+M6, single split: NOT ADDRESSED. No repeated cross-validation and no reason given, unlike the two analyses you declined with a reason. This was item (1) of my first-round recommendations.
+
+Minor 1, equation cross-references: PARTLY. Thesis numbering gone, four still wrong (minor 1).
+
+Minor 6, calibration: TEXT ADDED but unevidenced and absent from the code. See R7.
+
+Language: NOT ADDRESSED. All four phrases I quoted are unchanged (question 5, minor 7).
+
+Statistics: NOT ADDRESSED on either point from my first-round answer, the in-sample bootstrap threshold and multiple comparisons (question 3).
+
+
+NEW MAJOR CONCERNS
+
+R1. IN THE RELEASED CODE, EVERY REPORTED PERFORMANCE FIGURE IS PRODUCED BY SELECTION ON THE TEST SET.
+
+I treat the repository as authoritative because the manuscript does: the code-sharing statement calls it "the source code used to generate all results reported in this manuscript". If that is not true of these numbers, the right answer is to say so and release the code that is. I read the notebooks and their saved outputs but executed nothing.
+
+(a) Fusion weights. In run_multimodal_final.ipynb the grid computes a validation AUC and discards it:
+
+val_auc = roc_auc_score(y_val, combined_val) # computed, never used for selection
+res = evaluate(y_test, combined_test, "", verbose=False)
+if res['auc'] > best_auc:
+best_auc = res['auc']; best_weights_auc = (w1, w2, w3)
+
+The saved output reads "Total combinations tested: 186" and "Best by AUC: MRI=0.23, M2=0.63, M3=0.14", the weights reported in the manuscript. They are the argmax of test AUC over 186 candidates on 62 subjects with 7 positives, not of validation AUC as Eq (33) and bullet 3 of the transparency subsection state.
+
+(b) Threshold. evaluate() sets the threshold by Youden's J on the labels passed to it, and every call site passes y_test (roc_curve, then np.argmax(tpr - fpr)). So the confusion matrix TP = 6, FP = 7, TN = 48, FN = 1, and hence the new PPV, NPV and NNS, come from a threshold fitted on test labels. Bullet 4 places this on validation.
+
+(c) Checkpoints. In advanced_anxiety_questionnaire_prediction.ipynb the best epoch is chosen by test AUC under a variable named val_auc:
+
+val_probs = proto_net.predict_proba(X_test_t, prototypes)[:, 1].cpu().numpy()
+val_auc = roc_auc_score(y_test, val_probs)
+if val_auc > best_proto_auc:
+best_proto_auc = val_auc; best_state = {...}
+
+advanced_static_prediction.ipynb does the same, and also picks among eight models by test AUC. Bullet 5 places early stopping on validation.
+
+(d) Polarity. Both notebooks flip the sign of their predictions when test AUC falls below 0.5 (rf_inverted, proto_inverted),: the saved outputs read "ProtoNet AUC: 0.7818 [INVERTED]" for the questionnaire module and "ProtoNet AUC: 0.7065 [INVERTED]" for the phenotypic one, so the un-inverted values are about 0.218 and 0.294, both far worse than chance. Those inverted probabilities are written to module2_full_features.csv and module3_full_features.csv and consumed by the fusion notebook. I could not match any reported unimodal AUC (0.7455, 0.7766, 0.6961) to an un-inverted output, and 0.6961 appears in the questionnaire notebook's output rather than the phenotypic one. Please reconcile each reported value with the code and say whether its sign was set using test labels.
+
+(e) Modules 2 and 3 have no validation partition. Both notebooks stack train and validation into X_trainval and train on it, with the saved output "Original: 242 samples (31 pos)". Validation data is therefore training data for two of three modules, so the val_auc in (a) is partly in-sample and would have been uninformative even if used. The transparency subsection presents that partition as the basis of six decisions; on this code it was not held out.
+
+Together these mean the reported AUC 0.8935, F1 0.600, the weights 0.23/0.63/0.14 and the clinical utility metrics are not out-of-sample estimates. I am not suggesting anything about intent, and the cell headed "FINAL RESULTS (No Data Leakage)" tells me the question was considered. My point is narrower: the procedure implemented is not the procedure described, and the gap is large enough to change what the numbers mean.
+
+Please either re-run with every selection decision confined to a genuinely held-out validation partition (checkpoint, polarity, classifier choice, weights, threshold), report whatever the test metrics turn out to be, and revise all claims to match; or state that the repository is not the code behind the reported numbers and release the code that is. On cost, a point in your favour: the fusion grid already stores val_auc at every point, so selecting on it is a one-line change, though the module-level decisions do need re-running. A lower but honest number would not by itself make this unpublishable in PLOS ONE, which does not assess impact; publishing the current numbers with the current account of how they were obtained is what will not work.
+
+The new Ablation paragraph asserting that the disproportionate three-way gain is "not an artifact of overfitting" is not supportable as written: the three-way weights were tuned on the test set over 186 candidates while the pairwise combinations were not tuned at all, so that comparison is not like-for-like.
+
+R2. THE CORRECTED ATTENTION DESCRIPTION MAKES EACH PREDICTION DEPEND ON THE OTHER SUBJECTS SCORED WITH IT.
+
+On my previous M2 the authors are right and I accept the correction. The implementation is batch-level:
+
+def forward(self, x):
+q, k, v = self.query(x), self.key(x), self.value(x)
+attn = torch.softmax(q @ k.T * self.scale, dim=-1)
+return attn @ v + x
+
+With x of shape (n, 64), q @ k.T is (n, n) and the softmax is non-degenerate, as the revised text says. My original reading followed the manuscript, which described a per-sample operation.
+
+What follows is not that point restated but a consequence of the correction, invisible while the text described a per-sample operation. The minimum I ask is a statement of the inference batching policy and test metrics at batch size 1; removing the layer is an option, not a requirement. Because attn @ v mixes value vectors across samples, each subject's embedding is a weighted combination of the others in the same forward pass, and the test set is scored in one pass (X_test_t holds all 62 subjects). Three consequences:
+
+1. Inference is transductive: each test subject's score depends on the other 61, so the metrics describe a model that sees the whole test cohort at once.
+
+2. The model cannot be run as the paper motivates it. At n = 1 the softmax is over one element, equal to 1, and the layer reduces to V + x, so the reported performance is not attainable in per-subject screening.
+
+3. Splits are at family level, so intact twin pairs sit in the same partition and cross-sample attention lets a subject's representation draw on their co-twin's features inside the forward pass, the mechanism the family-level split exists to prevent. Since 118 of 422 subjects were excluded for incomplete data an unknown number of pairs are broken; please report how many intact pairs are in the test partition.
+
+Fig 4 gives no indication that the attention is batch-level; a block diagram may legitimately omit the batch dimension, so this is only a suggestion to annotate it. One knock-on effect: because the output is not a function of one subject's features alone, Shapley additivity does not hold, so resolving this is a prerequisite for the SHAP analysis in R6.
+
+R3. THE TWIN-AWARE DATA SPLITTING SUBSECTION HAS BEEN REMOVED.
+
+The original had a named subsection: "Twin-Aware Data Splitting. To prevent co-twin information leakage, data are split at the family level. Twin pairs are assigned entirely to one of the following sets: Training 60% (180; 24 positive), Validation 20% (62; 7), Test 20% (62; 7)." In the revision that heading and text are gone, the phrases "Twin-Aware Data Splitting" and "split at the family level" do not appear, and no split proportions are stated. What survives is the orphaned sentence "This strategy preserves class distributions, avoids inflated performance due to shared genetic information..." with no antecedent.
+
+The family-level split is the paper's headline contribution and the Abstract, Introduction and Conclusion all rest on it. It now has no description in the Methods, and the split files are not in the repository, so it can be neither read nor verified. I assume this was accidental, most likely when the 478/422/304 paragraph was inserted. Please restore it with the number of intact pairs per partition, and release the split files.
+
+R4. TABLE 3 CONTRADICTS THE METHODS AND CODE.
+
+Table 3 is a good addition but does not match the manuscript it sits in.
+
+Module 2: Table 3 gives Adam, LR 5e-4, 200 epochs, batch 32, dropout 0.3. The Methods give AdamW, initial LR 0.002, one-cycle peaking at 0.005, 150 epochs, dropout 0.2. The code agrees with the Methods: AdamW(lr=0.002, weight_decay=0.01), OneCycleLR(max_lr=0.005, epochs=150, steps_per_epoch=1), Dropout(0.2), full-batch with one step per epoch. Batch size matters beyond reproducibility here, because of R2.
+
+Module 3 diverges the same way: the code uses AdamW(lr=0.001, weight_decay=0.02), OneCycleLR(max_lr=0.003, epochs=250) and full-batch training against Table 3's Adam, 5e-4, 200 epochs, batch 32.
+
+Module 1: Table 3 gives "Focal Loss (gamma = 2)" where the Methods say cross-entropy; "SMOTE + class weights" where the Methods describe additive Gaussian noise and feature dropout and never mention SMOTE; "Embedding dimension 128" where the Methods describe 384 projected to 768.
+
+Three rows have no counterpart in the code: isotonic calibration (R7), "Class weights (1:7)", where the code uses copy-paste augmentation with FocalLoss(alpha=0.75), and early-stopping patience, where the code keeps the best-ever checkpoint. Limitations item 8 also generalises SMOTE to the whole framework against Table 3's own footnote, and the sentence introducing Table 3 says it "summarizes the hardware specifications", which no table does.
+
+R5. THE FUSION-WEIGHT JUSTIFICATION CONTRADICTS EQ (31) AND THE CODE.
+
+The new paragraph says the weights were searched in questionnaire [0.30, 0.80], MRI [0.10, 0.50], phenotypic [0.05, 0.30], with "more than 9,000 unique combinations" at step 0.02. Eq (31) gives w1 [0.15, 0.45], w2 [0.35, 0.65], w3 [0.10, 0.45], and the code matches Eq (31). The stated ranges are not merely different, they are infeasible: at step 0.02 the questionnaire and MRI grids fall on even hundredths and the phenotypic grid on odd ones, and two even values plus one odd cannot sum to 1.00, so no admissible point exists and none of the reported weights (0.23, 0.63, 0.14) lie on those grids. The real count is in your own output, "Total combinations tested: 186". Please correct it to the ranges searched and to 186.
+
+R6. THE SHAP ANALYSIS DOES NOT MATCH THE SCRIPT.
+
+The interpretability section is the right addition but cannot be relied on as it stands.
+
+- Feature count: the text says "Among the 88 questionnaire features analysed" while Module 2 uses the top 40 (Methods, Table 3, and top_k = 40 in the code).
+
+
+
+- Stated method: the manuscript says "the classical neural network architecture is not suitable for calculating SHAP values" and that random forest surrogates were trained. shap_analysis.py uses shap.KernelExplainer(wrapper.predict_proba, background) directly on the network, with no surrogate; KernelExplainer is model-agnostic, so the justification does not hold either way. If surrogates were used, report their fidelity to the network's predictions.
+
+- The released script does not compute attributions for the model's prediction: the prototype computation is commented out and replaced by probs = torch.softmax(embeddings, dim=1)[:, 1] under the comment "For now, using a simplified version", a softmax over the embedding rather than the prototype cosine similarities that define the output. The train/validation construction is also a placeholder: X_trainval = np.vstack([X_train]) # Use your actual train+val here. If Figs 8 to 11 came from other code, please release it.
+
+- The rankings diverge. The three highest-correlated features (pSCAS32, pSCAS18, pSCAS30), on which the Construct Overlap subsection rests, are absent from the SHAP top ten, whose leading feature SCAS19 is not in the correlation list. The lists are not disjoint (pSDQ13 and SCAS15 appear in both) but the divergence at the top is complete, and both are presented as the module's most influential features.
+
+R7. THE CALIBRATION SENSITIVITY ANALYSIS IS NOT IN THE CODE.
+
+The Abstract states that calibrated module outputs are fused, and the new paragraph reports isotonic regression against Platt scaling with "mean calibration error differences below 0.02 across decile bins". The strings isotonic, calibrat and platt appear in none of the five notebooks, and the fusion notebook combines the raw module probabilities directly. No per-module numbers, table or reliability diagram is given, and decile bins on 7 positives would not be informative anyway. Please release the code and numbers, or withdraw the sensitivity claim and the word "calibrated" from the Abstract and Eq (28).
+
+R8. PREVALENCE IS MISSTATED IN THE CLINICAL-UTILITY SUBSECTION.
+
+It twice reads "At the QTAB prevalence of 11.3% incident anxiety (38/304)". 38/304 is 12.5%, the figure given correctly in the Methods; 11.3% is the test-set positive rate (7/62), and at 12.5% the NNS is 9.3. Your response records this as a correction, "NNS: ~9 corrected to ~10", so the original value was right. Please state which prevalence the utility metrics assume, since PPV depends on it.
+
+RESIDUAL AND NEW MINOR ISSUES
+
+1. Cross-references, four wrong. The augmentation sentence cites "Eq (29)" for the equation numbered (24). The Late Fusion paragraph fuses "according to Eq (30)", the sum-to-one constraint, with weights chosen "as outlined in Eq (29)", the fusion equation; these should be (29) and (33). The next paragraph cites "Eqs (31) and (32)" for the argmax that is (33). Separately, the marked-up file reads "Table ??" where the clean file reads "Table 7", so the two submitted manuscripts are not the same compile; please regenerate the marked-up copy.
+
+2. The Module 2 Methods still end "Reported test AUC is 0.782" against 0.7766 in Table 4. Your response states "Questionnaire AUC: 0.782 corrected to 0.7766", but the sentence is unchanged. Note that 0.782 is the questionnaire notebook's saved output (0.7818), which may be the source. Relatedly, please give the Module 1 selection sentence one value for one quantity: 0.745 and 0.7455 appear a sentence apart.
+
+3. References. Refs 5 and 6 are the same article at two URLs, and fixing ref 31 created a second duplicate: refs 11 and 31 are both the QTAB Scientific Data paper (s41597-023-02038-w). Ref 3 has lost the DOI it carried originally (doi:10.1192/bjp.2022.165) and is now a bare Cambridge URL, a regression. Ref 53, a chest X-ray pneumonia paper, is cited for multimodal fusion; please check it is intended. Around twenty entries still carry no author and no DOI.
+
+4. Fig 4 matches the Methods on layer sizes now, but shows Dropout(0.3) where the code and Methods say 0.2, and labels the input "Static Features Input", Module 3 terminology. The caption still reads "behavioral and phenotypic feature encoding" while the figure shows only Module 2's dimensions. Either retitle it as Module 2 and add a Module 3 panel, or say which module is shown. The Methods also still omit the 64 to 32 embedding projection that Fig 4 and the code both contain.
+
+5. Language. The four phrases I quoted in the first round are unchanged: "offer hidden signals of weakness that can be comprehended"; "stops co-twin data from leaking"; "It is crucial to carefully look at twins to lower genetic prejudice", where the intended term is genetic confounding; and "Adolescents are generally the first to get sick with worry and the diseases that come with it". Please revise Scope and challenges and Related work for precision and consistent terminology.
+
+6. Study Limitations item 1 is corrupted: its heading is "Small positive test count and statistical power" but its body is item 8's class-imbalance text, so items 1 and 8 duplicate each other and the statistical-power limitation is missing. Your response to Reviewer 2 quotes the intended text, which did not reach the manuscript.
+
+7. The code-sharing statement claims "the source code used to generate all results reported in this manuscript", but several reported analyses are absent: 3D-CNN training and the brain-age transfer learning (Module 1 features are loaded from a .npz file), the bootstrap intervals in Fig 7, DeLong and McNemar (Table 6), the pairwise ablation (Fig 6), calibration, a working SHAP, and the split files. Please add these or narrow the statement.
+
+
+RECOMMENDATION TO THE AUTHORS
+
+The concept, the family-level split, the construct-overlap discussion and the decision to release code are real strengths, and the tempering of claims is exactly right.
+For a further round:
+(1) confine every selection decision to a genuinely held-out validation partition and report whatever the test metrics are
+(2) remove the polarity inversion on test labels
+(3) restore the Twin-Aware Data Splitting subsection and release the split files
+(4) fix the bootstrap threshold procedure and address multiple comparisons
+(5) state the inference batching policy and report batch-size-1 performance
+(6) make Table 3, the Methods and the code agree
+(7) correct the fusion-range paragraph
+(8) reconcile the SHAP section with the code or withdraw it
+(9) release the calibration code or withdraw the claim
+(10) align the code-sharing statement with the repository
+(11) fix the prevalence figure, cross-references, duplicate references, the corrupted limitation and the outstanding language passages.
+
+Reviewer #3: (No Response)
+
+Reviewer #4: I have reviewed the update manuscript.
+all my point were addressed.
+my main issue was the small number of cases. The authors added that this work should considered as a PoC.
+
+As I wrote previously, this kind of work, on this kind of topics is important and I well every effort, in that direction
+
+7. PLOS authors have the option to publish the peer review history of their article (what does this mean?). If published, this will include your full peer review and any attached files.
+
+
+If you choose “no”, your identity will remain anonymous but your review may still be made public.
+
+
+Do you want your identity to be public for this peer review? For information about this choice, including consent withdrawal, please see our Privacy Policy.
+
+Reviewer #1: No
+
+Reviewer #3: No
+
+Reviewer #4: No
