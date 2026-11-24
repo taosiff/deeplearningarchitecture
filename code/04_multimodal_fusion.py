@@ -623,28 +623,16 @@ print("GENERATING PUBLICATION-QUALITY FIGURES (FIG 5, 6, 7 & ROC/PR CURVES)")
 print("=" * 80)
 plt.style.use('seaborn-v0_8-whitegrid')
 
-# Figure 5: Multi-Panel Confusion Matrix (Panel A: Primary Simple Average, Panel B: Validation-Tuned Grid Search)
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.8), dpi=300)
-
-cm_avg = np.array([[res_avg['tn'], res_avg['fp']], [res_avg['fn'], res_avg['tp']]])
-sns.heatmap(cm_avg, annot=True, fmt='d', cmap='Blues', cbar=False,
-            xticklabels=['Pred Control', 'Pred Incident'],
-            yticklabels=['Actual Control', 'Actual Incident'],
-            annot_kws={'fontsize': 13, 'fontweight': 'bold'}, ax=ax1)
-ax1.set_title(f"A. Primary Simple Average (33/33/33)\nThreshold t* = {res_avg['opt_th']:.3f} | Test AUC = {res_avg['test_auc']:.3f}", fontsize=11, pad=10)
-
-cm_186 = np.array([[res_186['tn'], res_186['fp']], [res_186['fn'], res_186['tp']]])
-sns.heatmap(cm_186, annot=True, fmt='d', cmap='Blues', cbar=False,
-            xticklabels=['Pred Control', 'Pred Incident'],
-            yticklabels=['Actual Control', 'Actual Incident'],
-            annot_kws={'fontsize': 13, 'fontweight': 'bold'}, ax=ax2)
-ax2.set_title(f"B. Validation-Tuned Late Fusion (186 Grid)\nThreshold t* = {res_186['opt_th']:.3f} | Test AUC = {res_186['test_auc']:.3f}", fontsize=11, pad=10)
-
-plt.tight_layout()
-plt.savefig(OUT_DIR / 'Fig5_Confusion_Matrix.png', dpi=300)
-plt.savefig(OUT_DIR / 'Fig5_Confusion_Matrix.tif', dpi=300)
-plt.close()
-print("[SAVED] Fig5_Confusion_Matrix.png / .tif")
+# Figure 5 & Figure 8: Publication-Grade Tableau-Style Diagnostic Confusion Matrix
+try:
+    import sys
+    code_dir = str(Path(__file__).resolve().parent)
+    if code_dir not in sys.path:
+        sys.path.insert(0, code_dir)
+    from generate_tableau_confusion_matrix import build_tableau_confusion_matrix
+    build_tableau_confusion_matrix()
+except Exception as _cm_err:
+    print(f"[WARN] Could not generate Tableau confusion matrix: {_cm_err}")
 
 # Figure 6: Comparative Ablation Study
 fig, ax = plt.subplots(figsize=(9, 5), dpi=300)
