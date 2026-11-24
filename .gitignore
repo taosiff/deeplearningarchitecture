@@ -1,0 +1,22 @@
+# Virtual environment
+venv/
+env/
+.env
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.ipynb_checkpoints
+
+# IDE / local tooling
+.vscode/
+.idea/
+.qodo/
+
+# Scratch & temporary logs
+scratch/
+*.log
+
+# Large uncompressed figures (>10MB tif)
+results/*.tif
