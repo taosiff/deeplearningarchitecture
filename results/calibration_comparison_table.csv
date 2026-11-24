@@ -1,5 +1,5 @@
 Calibration Strategy,Brier Score,10-Bin ECE,Log-Loss,Test ROC-AUC,Notes
 Constant Prevalence Baseline (7/62 = 11.3%),0.1002,0.0,0.3525,0.5,Uninformative constant prediction (benchmark)
-Uncalibrated Simple Average (Primary),0.2259,0.3603,0.6447,0.7377,Raw linear heuristic without probability shrinkage
-Platt Scaling (Logistic Sigmoid),0.0999,0.0003,0.3514,0.7377,Shrinks scores toward cohort base-rate (Brier = baseline)
-Isotonic Regression (Piecewise),0.0962,0.0702,0.3134,0.7013,Step-function calibration induces rank ties on n=62
+Uncalibrated Simple Average (Primary),0.2291,0.3653,0.6511,0.7455,Raw linear heuristic without probability shrinkage
+Platt Scaling (Logistic Sigmoid),0.0999,0.0002,0.3515,0.7455,Shrinks scores toward cohort base-rate (Brier = baseline)
+Isotonic Regression (Piecewise),0.0935,0.067,0.3029,0.7091,Step-function calibration induces rank ties on n=62

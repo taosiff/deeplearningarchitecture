@@ -11,9 +11,14 @@ Methodological Compliance:
 2. Sample-Independent Attention: Self-attention operates strictly across latent feature
    tokens within each individual subject. Batch size 1 inference is mathematically identical to
    batch inference (zero cross-subject or cross-twin leakage; max_diff == 0.0).
-3. Episodic Few-Shot Meta-Learning: Solves severe cohort imbalance (1:6.5) by drawing
-   balanced support sets (12-shot positive, 12-shot negative) in each training episode,
-   optimizing prototype separation without skewing decision boundaries.
+3. Episodic Few-Shot Prototypical Architecture:
+   - In each training episode, class prototypes are constructed from a balanced 12-shot support set
+     (12 incident, 12 non-incident control subjects).
+   - The episodic cross-entropy loss is evaluated on the leftover training query set
+     (~12 incident, ~144 control subjects, ~1:12 imbalance ratio).
+   - Checkpoint selection and inference recompute support prototypes deterministically under
+     model.eval() (dropout OFF) using current post-step parameters, ensuring prototype tensors
+     exactly match the checkpointed network weights.
 4. Clinically Grounded Socioeconomic & Developmental Markers: Leverages robust indicators
    of socioeconomic deprivation (birth_IER_decile, birth_IRSD_decile, birth_IRSAD_decile)
    and early pubertal growth spurt (pPDS01_ses01) that generalize across cohorts without polarity inversion.
@@ -241,6 +246,7 @@ optimizer = optim.AdamW(model.parameters(), lr=0.003, weight_decay=2e-3)
 
 best_val_auc = 0.0
 best_state = None
+best_supp_idx = None
 best_p0 = None
 best_p1 = None
 best_ep = 0
@@ -260,18 +266,23 @@ for ep in range(1, 41):
     loss.backward()
     optimizer.step()
     
-    # Checkpointing strictly on Validation partition using that episode's support prototypes
+    # Checkpointing strictly on Validation partition:
+    # Recompute support prototypes under model.eval() (dropout OFF) with updated weights
     model.eval()
     with torch.no_grad():
+        z_supp_eval = model(X_tr_t[supp_idx])
+        p0_eval, p1_eval = model.compute_prototypes(z_supp_eval, y_tr_t[supp_idx])
+        
         z_va = model(X_va_t)
-        p_va = model.predict_proba(z_va, p0, p1).cpu().numpy()
+        p_va = model.predict_proba(z_va, p0_eval, p1_eval).cpu().numpy()
         val_auc = roc_auc_score(y_val, p_va)
         
         if val_auc > best_val_auc:
             best_val_auc = val_auc
             best_state = {k: v.cpu().clone() for k, v in model.state_dict().items()}
-            best_p0 = p0.clone()
-            best_p1 = p1.clone()
+            best_supp_idx = supp_idx.copy()
+            best_p0 = p0_eval.clone()
+            best_p1 = p1_eval.clone()
             best_ep = ep
 
 print(f"Validation Checkpoint Selected at Epoch {best_ep} (Val ROC-AUC = {best_val_auc:.4f})")
@@ -280,14 +291,22 @@ print(f"Validation Checkpoint Selected at Epoch {best_ep} (Val ROC-AUC = {best_v
 model.load_state_dict(best_state)
 model.eval()
 with torch.no_grad():
+    # Deterministic recomputation from checkpointed weights and saved support indices (dropout OFF)
+    z_supp_clean = model(X_tr_t[best_supp_idx])
+    p0_clean, p1_clean = model.compute_prototypes(z_supp_clean, y_tr_t[best_supp_idx])
+    diff0 = (p0_clean - best_p0).abs().max().item()
+    diff1 = (p1_clean - best_p1).abs().max().item()
+    assert diff0 < 1e-5 and diff1 < 1e-5, f"Prototype mismatch: diff0={diff0:.8e}, diff1={diff1:.8e}"
+    print(f"Prototype Tensor Clean Recomputation Verified: max diff = {max(diff0, diff1):.8e} (identical)")
+    
     z_tr = model(X_tr_t)
     z_va = model(X_va_t)
     z_te = model(X_te_t)
     
-    # Evaluate strictly with the checkpointed 12-shot support prototypes (Zero Duality)
-    p_train_m3 = model.predict_proba(z_tr, best_p0, best_p1).cpu().numpy()
-    p_val_m3 = model.predict_proba(z_va, best_p0, best_p1).cpu().numpy()
-    p_test_m3 = model.predict_proba(z_te, best_p0, best_p1).cpu().numpy()
+    # Evaluate strictly with the deterministic support prototypes
+    p_train_m3 = model.predict_proba(z_tr, p0_clean, p1_clean).cpu().numpy()
+    p_val_m3 = model.predict_proba(z_va, p0_clean, p1_clean).cpu().numpy()
+    p_test_m3 = model.predict_proba(z_te, p0_clean, p1_clean).cpu().numpy()
 
 # 6. Optimal Decision Threshold Selection Strictly on Validation Partition
 fpr_va, tpr_va, thresholds_va = roc_curve(y_val, p_val_m3)
@@ -331,6 +350,7 @@ np.save(PROCESSED_DIR / 'm3_test_probs.npy', p_test_m3)
 
 torch.save({
     'model_state_dict': model.state_dict(),
+    'supp_idx': best_supp_idx,
     'p0': best_p0.cpu(),
     'p1': best_p1.cpu(),
     'scaler': scaler,
